@@ -1,17 +1,13 @@
-//
-//  namerApp.swift
-//  namer
-//
-//  Created by Shahin on 19.01.25.
-//
-
 import SwiftUI
 
 @main
 struct namerApp: App {
+    @StateObject private var nameStore = NameStore()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(nameStore)
         }
     }
-}
+} 

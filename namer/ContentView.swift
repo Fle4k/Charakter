@@ -1,24 +1,27 @@
-//
-//  ContentView.swift
-//  namer
-//
-//  Created by Shahin on 19.01.25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+    @EnvironmentObject private var nameStore: NameStore
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView(selection: $selectedTab) {
+            NameGeneratorView()
+                .tabItem {
+                    Label("Neuer Name", systemImage: "person")
+                }
+                .tag(0)
+            
+            CollectionsView()
+                .tabItem {
+                    Label("Favoriten", systemImage: "star.fill")
+                }
+                .tag(1)
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
-}
+        .environmentObject(NameStore())
+} 
