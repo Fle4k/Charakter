@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "NamerAppIconLight.png",
+      "filename" : "fle4k_a_black_contour_silhouette_of_a_mans_face_in_profile_on_d0968eba-4f8a-4fd4-a33a-6e52acca39ac_0.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "NamerAppIconDark.png",
+      "filename" : "BestNameAppIconv3Dark.jpg",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "NamerAppIconTinted.png",
+      "filename" : "BestNameAppIconv3Dark 1.jpg",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
