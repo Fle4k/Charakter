@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		DB5230C52D3DB2FD0047DB3C /* namer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = namer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DB5230D52D3DB2FE0047DB3C /* namerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = namerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DB5230DF2D3DB2FE0047DB3C /* namerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = namerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB5230C52D3DB2FD0047DB3C /* Character.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Character.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB5230D52D3DB2FE0047DB3C /* CharacterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CharacterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB5230DF2D3DB2FE0047DB3C /* CharacterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CharacterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -85,9 +85,9 @@
 		DB5230C62D3DB2FD0047DB3C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DB5230C52D3DB2FD0047DB3C /* namer.app */,
-				DB5230D52D3DB2FE0047DB3C /* namerTests.xctest */,
-				DB5230DF2D3DB2FE0047DB3C /* namerUITests.xctest */,
+				DB5230C52D3DB2FD0047DB3C /* Character.app */,
+				DB5230D52D3DB2FE0047DB3C /* CharacterTests.xctest */,
+				DB5230DF2D3DB2FE0047DB3C /* CharacterUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		DB5230C42D3DB2FD0047DB3C /* namer */ = {
+		DB5230C42D3DB2FD0047DB3C /* Character */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "namer" */;
+			buildConfigurationList = DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "Character" */;
 			buildPhases = (
 				DB5230C12D3DB2FD0047DB3C /* Sources */,
 				DB5230C22D3DB2FD0047DB3C /* Frameworks */,
@@ -110,16 +110,16 @@
 			fileSystemSynchronizedGroups = (
 				DB5230C72D3DB2FD0047DB3C /* namer */,
 			);
-			name = namer;
+			name = Character;
 			packageProductDependencies = (
 			);
 			productName = namer;
-			productReference = DB5230C52D3DB2FD0047DB3C /* namer.app */;
+			productReference = DB5230C52D3DB2FD0047DB3C /* Character.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DB5230D42D3DB2FE0047DB3C /* namerTests */ = {
+		DB5230D42D3DB2FE0047DB3C /* CharacterTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "namerTests" */;
+			buildConfigurationList = DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterTests" */;
 			buildPhases = (
 				DB5230D12D3DB2FE0047DB3C /* Sources */,
 				DB5230D22D3DB2FE0047DB3C /* Frameworks */,
@@ -133,16 +133,16 @@
 			fileSystemSynchronizedGroups = (
 				DB5230D82D3DB2FE0047DB3C /* namerTests */,
 			);
-			name = namerTests;
+			name = CharacterTests;
 			packageProductDependencies = (
 			);
 			productName = namerTests;
-			productReference = DB5230D52D3DB2FE0047DB3C /* namerTests.xctest */;
+			productReference = DB5230D52D3DB2FE0047DB3C /* CharacterTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		DB5230DE2D3DB2FE0047DB3C /* namerUITests */ = {
+		DB5230DE2D3DB2FE0047DB3C /* CharacterUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "namerUITests" */;
+			buildConfigurationList = DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterUITests" */;
 			buildPhases = (
 				DB5230DB2D3DB2FE0047DB3C /* Sources */,
 				DB5230DC2D3DB2FE0047DB3C /* Frameworks */,
@@ -156,11 +156,11 @@
 			fileSystemSynchronizedGroups = (
 				DB5230E22D3DB2FE0047DB3C /* namerUITests */,
 			);
-			name = namerUITests;
+			name = CharacterUITests;
 			packageProductDependencies = (
 			);
 			productName = namerUITests;
-			productReference = DB5230DF2D3DB2FE0047DB3C /* namerUITests.xctest */;
+			productReference = DB5230DF2D3DB2FE0047DB3C /* CharacterUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "namer" */;
+			buildConfigurationList = DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "Character" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				DB5230C42D3DB2FD0047DB3C /* namer */,
-				DB5230D42D3DB2FE0047DB3C /* namerTests */,
-				DB5230DE2D3DB2FE0047DB3C /* namerUITests */,
+				DB5230C42D3DB2FD0047DB3C /* Character */,
+				DB5230D42D3DB2FE0047DB3C /* CharacterTests */,
+				DB5230DE2D3DB2FE0047DB3C /* CharacterUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		DB5230D72D3DB2FE0047DB3C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DB5230C42D3DB2FD0047DB3C /* namer */;
+			target = DB5230C42D3DB2FD0047DB3C /* Character */;
 			targetProxy = DB5230D62D3DB2FE0047DB3C /* PBXContainerItemProxy */;
 		};
 		DB5230E12D3DB2FE0047DB3C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DB5230C42D3DB2FD0047DB3C /* namer */;
+			target = DB5230C42D3DB2FD0047DB3C /* Character */;
 			targetProxy = DB5230E02D3DB2FE0047DB3C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -399,13 +399,14 @@
 				DEVELOPMENT_TEAM = QLZAR4XX2G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Namer;
+				INFOPLIST_KEY_CFBundleDisplayName = Charakter;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -433,13 +434,14 @@
 				DEVELOPMENT_TEAM = QLZAR4XX2G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Namer;
+				INFOPLIST_KEY_CFBundleDisplayName = Charakter;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -471,7 +473,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/namer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/namer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Character.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Character";
 			};
 			name = Debug;
 		};
@@ -490,7 +492,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/namer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/namer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Character.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Character";
 			};
 			name = Release;
 		};
@@ -531,7 +533,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "namer" */ = {
+		DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "Character" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230E72D3DB2FE0047DB3C /* Debug */,
@@ -540,7 +542,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "namer" */ = {
+		DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "Character" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230EA2D3DB2FE0047DB3C /* Debug */,
@@ -549,7 +551,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "namerTests" */ = {
+		DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230ED2D3DB2FE0047DB3C /* Debug */,
@@ -558,7 +560,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "namerUITests" */ = {
+		DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230F02D3DB2FE0047DB3C /* Debug */,
