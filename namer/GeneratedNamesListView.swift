@@ -14,42 +14,31 @@ struct GeneratedNamesListView: View {
         })
     }
     
-var body: some View {
-    Group {
-        if names.isEmpty {
-            Text("No names available")
-                .foregroundColor(.gray)
-        } else {
-            List(names) { name in
-                HStack {
-                    Text("\(name.firstName) \(name.lastName)")
-                    Spacer()
-                    Button {
-                        nameStore.toggleFavorite(name)
-                    } label: {
-                        Image(systemName: isNameInFavorites(name) ? "star.fill" : "star")
-                            .foregroundStyle(.black)
-                    }
+    var body: some View {
+        List(names) { name in
+            HStack {
+                Text("\(name.firstName) \(name.lastName)")
+                Spacer()
+                Button {
+                    print("Toggling favorite for: \(name.firstName) \(name.lastName)")  // Debug print
+                    nameStore.toggleFavorite(name)
+                    print("Favorites count: \(nameStore.favoriteNames.count)")  // Debug print
+                } label: {
+                    Image(systemName: isNameInFavorites(name) ? "star.fill" : "star")
+                        .foregroundStyle(.black)
+                }
+            }
+        }
+        .navigationTitle("Generierte Namen")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Fertig") {
+                    dismiss()
                 }
             }
         }
     }
-    .onAppear {
-        print("GeneratedNamesListView: onAppear with \(names.count) names")
-        if let firstNames = names.first {
-            print("First name details: \(firstNames.firstName) \(firstNames.lastName)")
-        }
-    }
-    .navigationTitle("Generierte Namen")
-    .navigationBarTitleDisplayMode(.inline)
-    .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button("Fertig") {
-                dismiss()
-            }
-        }
-    }
-}
 }
 
 #Preview {

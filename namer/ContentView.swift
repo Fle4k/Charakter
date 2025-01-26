@@ -18,10 +18,11 @@ struct ContentView: View {
                 }
                 .tag(1)
         }
+        .environmentObject(nameStore)
     }
 }
 
 #Preview {
     ContentView()
         .environmentObject(NameStore())
-} 
+}

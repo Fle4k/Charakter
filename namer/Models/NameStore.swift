@@ -6,21 +6,28 @@ class NameStore: ObservableObject {
     @Published var favoriteNames: [GermanName] = []
     @Published var collections: [NameCollection] = []
     
+    private let favoritesKey = "favoriteNames"
+    private let collectionsKey = "collections"
+    
     init() {
         loadCollections()
         loadFavorites()
     }
     
     private func loadCollections() {
-        // Load collections from persistence
-        // For now, just initialize with empty array if no saved data
-        self.collections = []
+        if let data = UserDefaults.standard.data(forKey: collectionsKey),
+           let decoded = try? JSONDecoder().decode([NameCollection].self, from: data) {
+            self.collections = decoded
+            print("Loaded \(collections.count) collections")
+        }
     }
     
     private func loadFavorites() {
-        // Load favorites from persistence
-        // For now, just initialize with empty array if no saved data
-        self.favoriteNames = []
+        if let data = UserDefaults.standard.data(forKey: favoritesKey),
+           let decoded = try? JSONDecoder().decode([GermanName].self, from: data) {
+            self.favoriteNames = decoded
+            print("Loaded \(favoriteNames.count) favorites")
+        }
     }
     
     func addCollection(_ collection: NameCollection) {
@@ -29,6 +36,7 @@ class NameStore: ObservableObject {
     }
     
     func toggleFavorite(_ name: GermanName) {
+        print("Toggling favorite for: \(name.firstName) \(name.lastName)")
         if let index = favoriteNames.firstIndex(where: {
             $0.firstName == name.firstName &&
             $0.lastName == name.lastName &&
@@ -36,8 +44,10 @@ class NameStore: ObservableObject {
             $0.birthYear == name.birthYear
         }) {
             favoriteNames.remove(at: index)
+            print("Removed from favorites. Count: \(favoriteNames.count)")
         } else {
             favoriteNames.append(name)
+            print("Added to favorites. Count: \(favoriteNames.count)")
         }
         saveFavorites()
     }
@@ -61,11 +71,16 @@ class NameStore: ObservableObject {
     }
     
     private func saveCollections() {
-        // Implement persistence logic here
+        if let encoded = try? JSONEncoder().encode(collections) {
+            UserDefaults.standard.set(encoded, forKey: collectionsKey)
+        }
     }
     
     private func saveFavorites() {
-        // Implement persistence logic here
+        if let encoded = try? JSONEncoder().encode(favoriteNames) {
+            UserDefaults.standard.set(encoded, forKey: favoritesKey)
+            print("Saved \(favoriteNames.count) favorites")
+        }
     }
     
     func deleteCollection(at offsets: IndexSet) {

@@ -1,13 +1,7 @@
 import SwiftUI
-import UniformTypeIdentifiers
-
-// First, create a type for dragging GermanName
-extension UTType {
-    static let GermanName = UTType(exportedAs: "com.yourapp.GermanName")
-}
 
 struct CollectionsView: View {
-    @StateObject private var nameStore = NameStore()
+    @EnvironmentObject var nameStore: NameStore
     @State private var showingNewCollectionSheet = false
     
     var groupedFavorites: [String: [GermanName]] {
@@ -17,20 +11,6 @@ struct CollectionsView: View {
     var body: some View {
         NavigationView {
             List {
-                Section("Favoriten") {
-                    if nameStore.favoriteNames.isEmpty {
-                        Text("Keine Favoriten")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(groupedFavorites.keys.sorted(), id: \.self) { key in
-                            Section(header: Text(key)) {
-                                ForEach(groupedFavorites[key] ?? []) { name in
-                                    FavoriteNameRow(name: name)
-                                }
-                            }
-                        }
-                    }
-                }
                 
                 Section("Sammlungen") {
                     if nameStore.collections.isEmpty {
@@ -44,8 +24,22 @@ struct CollectionsView: View {
                         }
                     }
                 }
+                Section("Favoriten") {
+                    if nameStore.favoriteNames.isEmpty {
+                        Text("Keine Favoriten")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(groupedFavorites.keys.sorted(), id: \.self) { key in
+                            Section(header: Text(key)) {
+                                ForEach(groupedFavorites[key] ?? []) { name in
+                                    FavoriteNameRow(name: name)
+                                        .environmentObject(nameStore)
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            .navigationTitle("Sammlungen")
             .toolbar {
                 Button {
                     showingNewCollectionSheet = true
@@ -62,16 +56,50 @@ struct CollectionsView: View {
 }
 
 struct FavoriteNameRow: View {
+    @EnvironmentObject var nameStore: NameStore
     let name: GermanName
     
     var body: some View {
         HStack {
             Text("\(name.firstName) \(name.lastName)")
-                .draggable(name)
+            
+            Spacer()
+            
+            Menu {
+                Button(action: {
+                    UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
+                }) {
+                    Label("Kopieren", systemImage: "doc.on.doc")
+                }
+                
+                Button(role: .destructive, action: {
+                    nameStore.toggleFavorite(name)
+                }) {
+                    Label("Entfernen", systemImage: "star.slash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .foregroundStyle(.gray)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                nameStore.toggleFavorite(name)
+            } label: {
+                Label("Entfernen", systemImage: "star.slash")
+            }
+            
+            Button {
+                UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
+            } label: {
+                Label("Kopieren", systemImage: "doc.on.doc")
+            }
+            .tint(.blue)
         }
     }
 }
 
 #Preview {
     CollectionsView()
+        .environmentObject(NameStore())
 }
