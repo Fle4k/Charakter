@@ -1,93 +1,77 @@
 import SwiftUI
+import UniformTypeIdentifiers
+
+// First, create a type for dragging GermanName
+extension UTType {
+    static let GermanName = UTType(exportedAs: "com.yourapp.GermanName")
+}
 
 struct CollectionsView: View {
-    @EnvironmentObject private var nameStore: NameStore
+    @StateObject private var nameStore = NameStore()
+    @State private var showingNewCollectionSheet = false
+    
+    var groupedFavorites: [String: [GermanName]] {
+        Dictionary(grouping: nameStore.favoriteNames) { $0.lastName.prefix(1).uppercased() }
+    }
     
     var body: some View {
         NavigationView {
-            Group {
-                if nameStore.favoriteNames.isEmpty {
-                    EmptyStateView()
-                } else {
-                    FavoritesList()
-                        .environmentObject(nameStore)
+            List {
+                Section("Favoriten") {
+                    if nameStore.favoriteNames.isEmpty {
+                        Text("Keine Favoriten")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(groupedFavorites.keys.sorted(), id: \.self) { key in
+                            Section(header: Text(key)) {
+                                ForEach(groupedFavorites[key] ?? []) { name in
+                                    FavoriteNameRow(name: name)
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-            .animation(.default, value: nameStore.favoriteNames.isEmpty)
-        }
-    }
-}
-
-// Empty state view
-private struct EmptyStateView: View {
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Hier landen deine Favoriten")
-                .font(.headline)
-            Text("Generiere neue Namen und markiere sie als Favoriten")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-        }
-    }
-}
-
-// Favorites list view
-private struct FavoritesList: View {
-    @EnvironmentObject private var nameStore: NameStore
-    
-    var body: some View {
-        List {
-            ForEach(groupedNames.keys.sorted(), id: \.self) { letter in
-                Section(header: Text(letter)) {
-                    ForEach(groupedNames[letter] ?? [], id: \.id) { name in
-                        FavoriteNameRow(name: name)
+                
+                Section("Sammlungen") {
+                    if nameStore.collections.isEmpty {
+                        Text("Keine Sammlungen")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(nameStore.collections) { collection in
+                            NavigationLink(destination: CollectionDetailView(collection: collection)) {
+                                Text(collection.name)
+                            }
+                        }
                     }
                 }
             }
-        }
-        .animation(.easeOut(duration: 0.3), value: nameStore.favoriteNames)
-        .navigationTitle("Gespeicherte Namen")
-        .onShake {
-            nameStore.undoLastRemoval()
-        }
-    }
-    
-    private var groupedNames: [String: [PersonName]] {
-        Dictionary(grouping: nameStore.favoriteNames) { name in
-            String(name.lastName.prefix(1))
+            .navigationTitle("Sammlungen")
+            .toolbar {
+                Button {
+                    showingNewCollectionSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            .sheet(isPresented: $showingNewCollectionSheet) {
+                NewCollectionSheet()
+                    .environmentObject(nameStore)
+            }
         }
     }
 }
 
-// Individual name row
-private struct FavoriteNameRow: View {
-    @EnvironmentObject private var nameStore: NameStore
-    let name: PersonName
+struct FavoriteNameRow: View {
+    let name: GermanName
     
     var body: some View {
         HStack {
             Text("\(name.firstName) \(name.lastName)")
-                .contextMenu {
-                    Button(action: {
-                        UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
-                    }) {
-                        Label("Kopieren", systemImage: "doc.on.doc")
-                    }
-                }
-            Spacer()
-            Button {
-                withAnimation {
-                    let impactMed = UIImpactFeedbackGenerator(style: .medium)
-                    impactMed.impactOccurred()
-                    
-                    nameStore.toggleFavorite(name)
-                }
-            } label: {
-                Image(systemName: "star.fill")
-                    .foregroundColor(.blue)
-            }
+                .draggable(name)
         }
     }
-} 
+}
+
+#Preview {
+    CollectionsView()
+}

@@ -1,26 +1,34 @@
+import SwiftUI
+
 struct NewCollectionView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject private var nameStore: NameStore
-    @Binding var isPresented: Bool
     @State private var collectionName = ""
     
     var body: some View {
         Form {
-            Section {
-                TextField("Name der Sammlung", text: $collectionName)
-            }
+            TextField("Name der Sammlung", text: $collectionName)
         }
         .navigationTitle("Neue Sammlung")
         .navigationBarItems(
             leading: Button("Abbrechen") {
-                isPresented = false
+                dismiss()
             },
             trailing: Button("Fertig") {
                 if !collectionName.isEmpty {
-                    nameStore.addCollection(NameCollection(name: collectionName))
-                    isPresented = false
+                    let newCollection = NameCollection(name: collectionName)
+                    nameStore.addCollection(newCollection)
+                    dismiss()
                 }
             }
             .disabled(collectionName.isEmpty)
         )
+    }
+}
+
+#Preview {
+    NavigationView {
+        NewCollectionView()
+            .environmentObject(NameStore())
     }
 } 

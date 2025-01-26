@@ -1,89 +1,84 @@
 import Foundation
+import SwiftUI
 
 @MainActor
 class NameStore: ObservableObject {
-    @Published private(set) var favoriteNames: [PersonName] = []
-    private var lastRemovedName: PersonName?
-    private let saveKey = "FavoriteNames"
+    @Published var favoriteNames: [GermanName] = []
+    @Published var collections: [NameCollection] = []
     
     init() {
+        loadCollections()
         loadFavorites()
     }
     
+    private func loadCollections() {
+        // Load collections from persistence
+        // For now, just initialize with empty array if no saved data
+        self.collections = []
+    }
+    
     private func loadFavorites() {
-        if let data = UserDefaults.standard.data(forKey: saveKey),
-           let decoded = try? JSONDecoder().decode([PersonName].self, from: data) {
-            favoriteNames = decoded
+        // Load favorites from persistence
+        // For now, just initialize with empty array if no saved data
+        self.favoriteNames = []
+    }
+    
+    func addCollection(_ collection: NameCollection) {
+        collections.append(collection)
+        saveCollections()
+    }
+    
+    func toggleFavorite(_ name: GermanName) {
+        if let index = favoriteNames.firstIndex(where: {
+            $0.firstName == name.firstName &&
+            $0.lastName == name.lastName &&
+            $0.gender == name.gender &&
+            $0.birthYear == name.birthYear
+        }) {
+            favoriteNames.remove(at: index)
+        } else {
+            favoriteNames.append(name)
         }
+        saveFavorites()
+    }
+    
+    func addNameToCollection(_ name: GermanName, to collectionId: UUID) {
+        if let index = collections.firstIndex(where: { $0.id == collectionId }) {
+            var collection = collections[index]
+            if !collection.names.contains(where: { $0.id == name.id }) {
+                collection.names.append(name)
+                collections[index] = collection
+                saveCollections()
+            }
+        }
+    }
+    
+    func removeFavorite(_ name: GermanName) {
+        if let index = favoriteNames.firstIndex(where: { $0.id == name.id }) {
+            favoriteNames.remove(at: index)
+            saveFavorites()
+        }
+    }
+    
+    private func saveCollections() {
+        // Implement persistence logic here
     }
     
     private func saveFavorites() {
-        if let encoded = try? JSONEncoder().encode(favoriteNames) {
-            UserDefaults.standard.set(encoded, forKey: saveKey)
-        }
+        // Implement persistence logic here
     }
     
-    func addFavorite(_ name: PersonName) {
-        if !favoriteNames.contains(where: { $0.id == name.id }) {
-            favoriteNames.append(name)
-            saveFavorites()
-        }
+    func deleteCollection(at offsets: IndexSet) {
+        collections.remove(atOffsets: offsets)
+        saveCollections()
     }
     
-    func removeFavorite(_ name: PersonName) {
-        if let index = favoriteNames.firstIndex(where: { $0.id == name.id }) {
-            favoriteNames.remove(at: index)
-            saveFavorites()
+    func renameCollection(_ id: UUID, to newName: String) {
+        if let index = collections.firstIndex(where: { $0.id == id }) {
+            var updatedCollection = collections[index]
+            updatedCollection.name = newName
+            collections[index] = updatedCollection
+            saveCollections()
         }
     }
-    
-    func toggleFavorite(_ name: PersonName) {
-        if let index = favoriteNames.firstIndex(where: { $0.id == name.id }) {
-            lastRemovedName = favoriteNames[index]
-            favoriteNames.remove(at: index)
-            saveFavorites()
-        } else {
-            var nameToAdd = name
-            nameToAdd.isFavorite = true
-            favoriteNames.append(nameToAdd)
-            saveFavorites()
-        }
-    }
-    
-    func undoLastRemoval() {
-        if let name = lastRemovedName {
-            favoriteNames.append(name)
-            lastRemovedName = nil
-            saveFavorites()
-        }
-    }
-    
-    // Add persistence
-    private static func fileURL() throws -> URL {
-        try FileManager.default.url(for: .documentDirectory,
-                                  in: .userDomainMask,
-                                  appropriateFor: nil,
-                                  create: false)
-        .appendingPathComponent("favorites.data")
-    }
-    
-    func load() {
-        do {
-            let fileURL = try Self.fileURL()
-            guard let data = try? Data(contentsOf: fileURL) else { return }
-            favoriteNames = try JSONDecoder().decode([PersonName].self, from: data)
-        } catch {
-            print("Error loading favorites: \(error)")
-        }
-    }
-    
-    func save() {
-        do {
-            let data = try JSONEncoder().encode(favoriteNames)
-            let outfile = try Self.fileURL()
-            try data.write(to: outfile)
-        } catch {
-            print("Error saving favorites: \(error)")
-        }
-    }
-} 
+}

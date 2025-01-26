@@ -1,37 +1,63 @@
 import SwiftUI
 
 struct GeneratedNamesListView: View {
-    let names: [PersonName]
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var nameStore: NameStore
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var nameStore: NameStore
+    let names: [GermanName]
     
-    var sortedNames: [PersonName] {
-        names.sorted { $0.lastName < $1.lastName }
+    func isNameInFavorites(_ name: GermanName) -> Bool {
+        nameStore.favoriteNames.contains(where: {
+            $0.firstName == name.firstName &&
+            $0.lastName == name.lastName &&
+            $0.gender == name.gender &&
+            $0.birthYear == name.birthYear
+        })
     }
     
-    var body: some View {
-        List {
-            ForEach(sortedNames) { name in
+var body: some View {
+    Group {
+        if names.isEmpty {
+            Text("No names available")
+                .foregroundColor(.gray)
+        } else {
+            List(names) { name in
                 HStack {
                     Text("\(name.firstName) \(name.lastName)")
-                        .contextMenu {
-                            Button(action: {
-                                UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
-                            }) {
-                                Label("Kopieren", systemImage: "doc.on.doc")
-                            }
-                        }
                     Spacer()
                     Button {
                         nameStore.toggleFavorite(name)
                     } label: {
-                        Image(systemName: nameStore.favoriteNames.contains(where: { $0.id == name.id }) ? "star.fill" : "star")
-                            .foregroundColor(nameStore.favoriteNames.contains(where: { $0.id == name.id }) ? .blue : .gray)
+                        Image(systemName: isNameInFavorites(name) ? "star.fill" : "star")
+                            .foregroundStyle(.black)
                     }
                 }
             }
         }
-        .navigationTitle("Neue Namen")
-        .navigationBarItems(trailing: Button("Fertig", action: dismiss.callAsFunction))
     }
-} 
+    .onAppear {
+        print("GeneratedNamesListView: onAppear with \(names.count) names")
+        if let firstNames = names.first {
+            print("First name details: \(firstNames.firstName) \(firstNames.lastName)")
+        }
+    }
+    .navigationTitle("Generierte Namen")
+    .navigationBarTitleDisplayMode(.inline)
+    .toolbar {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button("Fertig") {
+                dismiss()
+            }
+        }
+    }
+}
+}
+
+#Preview {
+    NavigationView {
+        GeneratedNamesListView(names: [
+            GermanName(firstName: "Max", lastName: "Mustermann", gender: .male, birthYear: 1990),
+            GermanName(firstName: "Erika", lastName: "Musterfrau", gender: .female, birthYear: 1992)
+        ])
+        .environmentObject(NameStore())
+    }
+}
