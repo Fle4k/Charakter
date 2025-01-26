@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		DB5230C52D3DB2FD0047DB3C /* Character.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Character.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DB5230D52D3DB2FE0047DB3C /* CharacterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CharacterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DB5230DF2D3DB2FE0047DB3C /* CharacterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CharacterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB5230C52D3DB2FD0047DB3C /* Charakter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Charakter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB5230D52D3DB2FE0047DB3C /* CharakterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CharakterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB5230DF2D3DB2FE0047DB3C /* CharakterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CharakterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -85,9 +85,9 @@
 		DB5230C62D3DB2FD0047DB3C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DB5230C52D3DB2FD0047DB3C /* Character.app */,
-				DB5230D52D3DB2FE0047DB3C /* CharacterTests.xctest */,
-				DB5230DF2D3DB2FE0047DB3C /* CharacterUITests.xctest */,
+				DB5230C52D3DB2FD0047DB3C /* Charakter.app */,
+				DB5230D52D3DB2FE0047DB3C /* CharakterTests.xctest */,
+				DB5230DF2D3DB2FE0047DB3C /* CharakterUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		DB5230C42D3DB2FD0047DB3C /* Character */ = {
+		DB5230C42D3DB2FD0047DB3C /* Charakter */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "Character" */;
+			buildConfigurationList = DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "Charakter" */;
 			buildPhases = (
 				DB5230C12D3DB2FD0047DB3C /* Sources */,
 				DB5230C22D3DB2FD0047DB3C /* Frameworks */,
@@ -110,16 +110,16 @@
 			fileSystemSynchronizedGroups = (
 				DB5230C72D3DB2FD0047DB3C /* namer */,
 			);
-			name = Character;
+			name = Charakter;
 			packageProductDependencies = (
 			);
 			productName = namer;
-			productReference = DB5230C52D3DB2FD0047DB3C /* Character.app */;
+			productReference = DB5230C52D3DB2FD0047DB3C /* Charakter.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DB5230D42D3DB2FE0047DB3C /* CharacterTests */ = {
+		DB5230D42D3DB2FE0047DB3C /* CharakterTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterTests" */;
+			buildConfigurationList = DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharakterTests" */;
 			buildPhases = (
 				DB5230D12D3DB2FE0047DB3C /* Sources */,
 				DB5230D22D3DB2FE0047DB3C /* Frameworks */,
@@ -133,16 +133,16 @@
 			fileSystemSynchronizedGroups = (
 				DB5230D82D3DB2FE0047DB3C /* namerTests */,
 			);
-			name = CharacterTests;
+			name = CharakterTests;
 			packageProductDependencies = (
 			);
 			productName = namerTests;
-			productReference = DB5230D52D3DB2FE0047DB3C /* CharacterTests.xctest */;
+			productReference = DB5230D52D3DB2FE0047DB3C /* CharakterTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		DB5230DE2D3DB2FE0047DB3C /* CharacterUITests */ = {
+		DB5230DE2D3DB2FE0047DB3C /* CharakterUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterUITests" */;
+			buildConfigurationList = DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharakterUITests" */;
 			buildPhases = (
 				DB5230DB2D3DB2FE0047DB3C /* Sources */,
 				DB5230DC2D3DB2FE0047DB3C /* Frameworks */,
@@ -156,11 +156,11 @@
 			fileSystemSynchronizedGroups = (
 				DB5230E22D3DB2FE0047DB3C /* namerUITests */,
 			);
-			name = CharacterUITests;
+			name = CharakterUITests;
 			packageProductDependencies = (
 			);
 			productName = namerUITests;
-			productReference = DB5230DF2D3DB2FE0047DB3C /* CharacterUITests.xctest */;
+			productReference = DB5230DF2D3DB2FE0047DB3C /* CharakterUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "Character" */;
+			buildConfigurationList = DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "Charakter" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				DB5230C42D3DB2FD0047DB3C /* Character */,
-				DB5230D42D3DB2FE0047DB3C /* CharacterTests */,
-				DB5230DE2D3DB2FE0047DB3C /* CharacterUITests */,
+				DB5230C42D3DB2FD0047DB3C /* Charakter */,
+				DB5230D42D3DB2FE0047DB3C /* CharakterTests */,
+				DB5230DE2D3DB2FE0047DB3C /* CharakterUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		DB5230D72D3DB2FE0047DB3C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DB5230C42D3DB2FD0047DB3C /* Character */;
+			target = DB5230C42D3DB2FD0047DB3C /* Charakter */;
 			targetProxy = DB5230D62D3DB2FE0047DB3C /* PBXContainerItemProxy */;
 		};
 		DB5230E12D3DB2FE0047DB3C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DB5230C42D3DB2FD0047DB3C /* Character */;
+			target = DB5230C42D3DB2FD0047DB3C /* Charakter */;
 			targetProxy = DB5230E02D3DB2FE0047DB3C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -473,7 +473,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Character.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Character";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Charakter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Charakter";
 			};
 			name = Debug;
 		};
@@ -492,7 +492,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Character.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Character";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Charakter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Charakter";
 			};
 			name = Release;
 		};
@@ -533,7 +533,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "Character" */ = {
+		DB5230C02D3DB2FD0047DB3C /* Build configuration list for PBXProject "Charakter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230E72D3DB2FE0047DB3C /* Debug */,
@@ -542,7 +542,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "Character" */ = {
+		DB5230E92D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "Charakter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230EA2D3DB2FE0047DB3C /* Debug */,
@@ -551,7 +551,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterTests" */ = {
+		DB5230EC2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharakterTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230ED2D3DB2FE0047DB3C /* Debug */,
@@ -560,7 +560,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharacterUITests" */ = {
+		DB5230EF2D3DB2FE0047DB3C /* Build configuration list for PBXNativeTarget "CharakterUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DB5230F02D3DB2FE0047DB3C /* Debug */,
