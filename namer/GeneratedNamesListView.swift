@@ -18,11 +18,16 @@ struct GeneratedNamesListView: View {
         List(names) { name in
             HStack {
                 Text("\(name.firstName) \(name.lastName)")
+                    .contextMenu {
+                        Button(action: {
+                            UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
+                        }) {
+                            Label("Kopieren", systemImage: "doc.on.doc")
+                        }
+                    }
                 Spacer()
                 Button {
-                    print("Toggling favorite for: \(name.firstName) \(name.lastName)")  // Debug print
                     nameStore.toggleFavorite(name)
-                    print("Favorites count: \(nameStore.favoriteNames.count)")  // Debug print
                 } label: {
                     Image(systemName: isNameInFavorites(name) ? "star.fill" : "star")
                         .foregroundStyle(.black)

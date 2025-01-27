@@ -4,22 +4,16 @@ import SwiftUI
 @MainActor
 class NameStore: ObservableObject {
     @Published var favoriteNames: [GermanName] = []
-    @Published var collections: [NameCollection] = []
-    
+    @Published private var personDetails: [String: PersonDetails] = [:]
     private let favoritesKey = "favoriteNames"
-    private let collectionsKey = "collections"
+    private var recentlyRemovedFavorites: [GermanName] = []
+    private var recentlyDeletedNames: [GermanName] = []
+    private let maxUndoCount = 10
+    private let detailsKey = "personDetails"
     
     init() {
-        loadCollections()
         loadFavorites()
-    }
-    
-    private func loadCollections() {
-        if let data = UserDefaults.standard.data(forKey: collectionsKey),
-           let decoded = try? JSONDecoder().decode([NameCollection].self, from: data) {
-            self.collections = decoded
-            print("Loaded \(collections.count) collections")
-        }
+        loadDetails()
     }
     
     private func loadFavorites() {
@@ -30,9 +24,11 @@ class NameStore: ObservableObject {
         }
     }
     
-    func addCollection(_ collection: NameCollection) {
-        collections.append(collection)
-        saveCollections()
+    private func loadDetails() {
+        if let data = UserDefaults.standard.data(forKey: detailsKey),
+           let decoded = try? JSONDecoder().decode([String: PersonDetails].self, from: data) {
+            self.personDetails = decoded
+        }
     }
     
     func toggleFavorite(_ name: GermanName) {
@@ -43,7 +39,11 @@ class NameStore: ObservableObject {
             $0.gender == name.gender &&
             $0.birthYear == name.birthYear
         }) {
-            favoriteNames.remove(at: index)
+            let removedName = favoriteNames.remove(at: index)
+            recentlyRemovedFavorites.append(removedName)
+            if recentlyRemovedFavorites.count > maxUndoCount {
+                recentlyRemovedFavorites.removeFirst()
+            }
             print("Removed from favorites. Count: \(favoriteNames.count)")
         } else {
             favoriteNames.append(name)
@@ -52,27 +52,13 @@ class NameStore: ObservableObject {
         saveFavorites()
     }
     
-    func addNameToCollection(_ name: GermanName, to collectionId: UUID) {
-        if let index = collections.firstIndex(where: { $0.id == collectionId }) {
-            var collection = collections[index]
-            if !collection.names.contains(where: { $0.id == name.id }) {
-                collection.names.append(name)
-                collections[index] = collection
-                saveCollections()
-            }
-        }
-    }
-    
-    func removeFavorite(_ name: GermanName) {
-        if let index = favoriteNames.firstIndex(where: { $0.id == name.id }) {
-            favoriteNames.remove(at: index)
+    func undoRecentRemovals() {
+        guard !recentlyRemovedFavorites.isEmpty else { return }
+        
+        withAnimation {
+            favoriteNames.append(contentsOf: recentlyRemovedFavorites)
+            recentlyRemovedFavorites.removeAll()
             saveFavorites()
-        }
-    }
-    
-    private func saveCollections() {
-        if let encoded = try? JSONEncoder().encode(collections) {
-            UserDefaults.standard.set(encoded, forKey: collectionsKey)
         }
     }
     
@@ -83,17 +69,36 @@ class NameStore: ObservableObject {
         }
     }
     
-    func deleteCollection(at offsets: IndexSet) {
-        collections.remove(atOffsets: offsets)
-        saveCollections()
+    private func saveDetails() {
+        if let encoded = try? JSONEncoder().encode(personDetails) {
+            UserDefaults.standard.set(encoded, forKey: detailsKey)
+        }
     }
     
-    func renameCollection(_ id: UUID, to newName: String) {
-        if let index = collections.firstIndex(where: { $0.id == id }) {
-            var updatedCollection = collections[index]
-            updatedCollection.name = newName
-            collections[index] = updatedCollection
-            saveCollections()
+    func getDetails(for name: GermanName) -> PersonDetails {
+        let key = "\(name.firstName)_\(name.lastName)_\(name.birthYear)"
+        return personDetails[key] ?? PersonDetails()
+    }
+    
+    func saveDetails(_ details: PersonDetails, for name: GermanName) {
+        let key = "\(name.firstName)_\(name.lastName)_\(name.birthYear)"
+        personDetails[key] = details
+        saveDetails()
+    }
+    
+    func deleteGeneratedName(_ name: GermanName) {
+        recentlyDeletedNames.append(name)
+        if recentlyDeletedNames.count > maxUndoCount {
+            recentlyDeletedNames.removeFirst()
         }
+        if let index = favoriteNames.firstIndex(where: { $0.id == name.id }) {
+            favoriteNames.remove(at: index)
+            saveFavorites()
+        }
+    }
+    
+    func undoDeletedName() {
+        guard !recentlyDeletedNames.isEmpty else { return }
+        recentlyDeletedNames.removeLast()
     }
 }
