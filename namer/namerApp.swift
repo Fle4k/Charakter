@@ -18,6 +18,7 @@ struct NamerApp: App {
                     }
             }
             .environmentObject(nameStore)
+            .tint(.black)
         }
     }
 } 

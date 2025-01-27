@@ -34,6 +34,7 @@ struct GeneratedNamesListView: View {
                 }
             }
         }
+        .listStyle(.plain)
         .navigationTitle("Generierte Namen")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

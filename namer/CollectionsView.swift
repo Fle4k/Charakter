@@ -24,8 +24,9 @@ struct CollectionsView: View {
                     }
                 }
             }
-//            .navigationTitle("Favoriten")
-//            .animation(.easeOut, value: nameStore.favoriteNames)
+            .listStyle(.plain)
+            .navigationTitle("Favoriten")
+            .animation(.easeOut, value: nameStore.favoriteNames)
         }
         .onShake {
             nameStore.undoRecentRemovals()
