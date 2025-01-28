@@ -1,10 +1,13 @@
 import SwiftUI
+import PhotosUI
 
 struct NameDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let name: GermanName
     @EnvironmentObject var nameStore: NameStore
     @State private var showingUnfavoriteAlert = false
+    @State private var showingImagePicker = false
+    @State private var selectedImage: UIImage?
     
     @State private var height = ""
     @State private var hairColor = ""
@@ -25,11 +28,28 @@ struct NameDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Rectangle()
-                    .fill(.gray.opacity(0.2))
-                    .frame(height: 200)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding()
+                Button {
+                    showingImagePicker = true
+                } label: {
+                    if let image = selectedImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    } else {
+                        Rectangle()
+                            .fill(.gray.opacity(0.2))
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(.gray)
+                            }
+                    }
+                }
+                .padding()
                 
                 VStack(spacing: 0) {
                     DetailRow(title: "Alter:", value: "\(Calendar.current.component(.year, from: Date()) - name.birthYear)", isEditable: false)
@@ -61,43 +81,9 @@ struct NameDetailView: View {
                 }
             }
         }
-        .alert("Daten löschen?", isPresented: $showingUnfavoriteAlert) {
-            Button("Abbrechen", role: .cancel) { }
-            Button("Löschen", role: .destructive) {
-                // Clear stored data
-                let defaults = UserDefaults.standard
-                defaults.removeObject(forKey: "height_\(name.id)")
-                defaults.removeObject(forKey: "hairColor_\(name.id)")
-                defaults.removeObject(forKey: "eyeColor_\(name.id)")
-                defaults.removeObject(forKey: "characteristics_\(name.id)")
-                defaults.removeObject(forKey: "style_\(name.id)")
-                defaults.removeObject(forKey: "type_\(name.id)")
-                
-                nameStore.toggleFavorite(name)
-                dismiss()
-            }
-        } message: {
-            Text("Wenn du diesen Namen von den Favoriten entfernst, gehen alle eingegebenen Daten verloren.")
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(image: $selectedImage)
         }
-        .onShake {
-            nameStore.undoDeletedName()
-        }
-        .onAppear {
-            // Load saved values
-            let defaults = UserDefaults.standard
-            height = defaults.string(forKey: "height_\(name.id)") ?? ""
-            hairColor = defaults.string(forKey: "hairColor_\(name.id)") ?? ""
-            eyeColor = defaults.string(forKey: "eyeColor_\(name.id)") ?? ""
-            characteristics = defaults.string(forKey: "characteristics_\(name.id)") ?? ""
-            style = defaults.string(forKey: "style_\(name.id)") ?? ""
-            type = defaults.string(forKey: "type_\(name.id)") ?? ""
-        }
-        .onChange(of: height) { _, value in saveValue(value, forKey: "height") }
-        .onChange(of: hairColor) { _, value in saveValue(value, forKey: "hairColor") }
-        .onChange(of: eyeColor) { _, value in saveValue(value, forKey: "eyeColor") }
-        .onChange(of: characteristics) { _, value in saveValue(value, forKey: "characteristics") }
-        .onChange(of: style) { _, value in saveValue(value, forKey: "style") }
-        .onChange(of: type) { _, value in saveValue(value, forKey: "type") }
     }
 }
 
@@ -130,6 +116,47 @@ struct DetailRow: View {
             if !isLast {
                 Divider()
                     .padding(.leading)
+            }
+        }
+    }
+}
+
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var image: UIImage?
+    @Environment(\.dismiss) private var dismiss
+    
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.filter = .images
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let parent: ImagePicker
+        
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+        
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            parent.dismiss()
+            
+            guard let provider = results.first?.itemProvider else { return }
+            
+            if provider.canLoadObject(ofClass: UIImage.self) {
+                provider.loadObject(ofClass: UIImage.self) { image, _ in
+                    DispatchQueue.main.async {
+                        self.parent.image = image as? UIImage
+                    }
+                }
             }
         }
     }

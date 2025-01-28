@@ -11,6 +11,10 @@ class NameStore: ObservableObject {
     private let maxUndoCount = 10
     private let detailsKey = "personDetails"
     
+    // Add new properties for image handling
+    private let imagePrefix = "nameImage_"
+    private let imageRefsKey = "nameImageRefs"
+    
     init() {
         loadFavorites()
         loadDetails()
@@ -100,5 +104,50 @@ class NameStore: ObservableObject {
     func undoDeletedName() {
         guard !recentlyDeletedNames.isEmpty else { return }
         recentlyDeletedNames.removeLast()
+    }
+    
+    // Save image for a name
+    func saveImage(_ image: UIImage, for name: GermanName) {
+        guard let data = image.jpegData(compressionQuality: 0.7) else { return }
+        let filename = imagePrefix + name.id
+        
+        if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = url.appendingPathComponent(filename)
+            try? data.write(to: fileURL)
+            
+            // Save reference in UserDefaults
+            var imageRefs = UserDefaults.standard.dictionary(forKey: imageRefsKey) as? [String: String] ?? [:]
+            imageRefs[name.id] = filename
+            UserDefaults.standard.set(imageRefs, forKey: imageRefsKey)
+        }
+    }
+    
+    // Load image for a name
+    func loadImage(for name: GermanName) -> UIImage? {
+        let imageRefs = UserDefaults.standard.dictionary(forKey: imageRefsKey) as? [String: String] ?? [:]
+        guard let filename = imageRefs[name.id] else { return nil }
+        
+        if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = url.appendingPathComponent(filename)
+            if let data = try? Data(contentsOf: fileURL) {
+                return UIImage(data: data)
+            }
+        }
+        return nil
+    }
+    
+    // Delete image for a name
+    func deleteImage(for name: GermanName) {
+        let filename = imagePrefix + name.id
+        
+        if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = url.appendingPathComponent(filename)
+            try? FileManager.default.removeItem(at: fileURL)
+            
+            // Remove reference from UserDefaults
+            var imageRefs = UserDefaults.standard.dictionary(forKey: imageRefsKey) as? [String: String] ?? [:]
+            imageRefs.removeValue(forKey: name.id)
+            UserDefaults.standard.set(imageRefs, forKey: imageRefsKey)
+        }
     }
 }
