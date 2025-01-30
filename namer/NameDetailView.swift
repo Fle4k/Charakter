@@ -5,28 +5,17 @@ struct NameDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let name: GermanName
     @EnvironmentObject var nameStore: NameStore
-    @State private var showingUnfavoriteAlert = false
     @State private var showingImagePicker = false
     @State private var selectedImage: UIImage?
-    
-    @State private var height = ""
-    @State private var hairColor = ""
-    @State private var eyeColor = ""
-    @State private var characteristics = ""
-    @State private var style = ""
-    @State private var type = ""
-    
-    private func saveValue(_ value: String, forKey key: String) {
-        UserDefaults.standard.set(value, forKey: "\(key)_\(name.id)")
-    }
-    
-    private func loadValue(forKey key: String) -> String {
-        UserDefaults.standard.string(forKey: "\(key)_\(name.id)") ?? ""
-    }
+    @State private var details = PersonDetails()
     
     private var hasStoredData: Bool {
-        !height.isEmpty || !hairColor.isEmpty || !eyeColor.isEmpty ||
-        !characteristics.isEmpty || !style.isEmpty || !type.isEmpty ||
+        !details.height.isEmpty ||
+        !details.hairColor.isEmpty ||
+        !details.eyeColor.isEmpty ||
+        !details.characteristics.isEmpty ||
+        !details.style.isEmpty ||
+        !details.type.isEmpty ||
         selectedImage != nil
     }
     
@@ -58,54 +47,61 @@ struct NameDetailView: View {
                     .bold()
                 
                 VStack(spacing: 0) {
-                    DetailRow(title: "Größe:", text: $height, onChanged: { saveValue($0, forKey: "height") })
-                    DetailRow(title: "Haarfarbe:", text: $hairColor, onChanged: { saveValue($0, forKey: "hairColor") })
-                    DetailRow(title: "Augenfarbe:", text: $eyeColor, onChanged: { saveValue($0, forKey: "eyeColor") })
-                    DetailRow(title: "Merkmale:", text: $characteristics, onChanged: { saveValue($0, forKey: "characteristics") })
-                    DetailRow(title: "Style:", text: $style, onChanged: { saveValue($0, forKey: "style") })
-                    DetailRow(title: "Typ:", text: $type, isLast: true, onChanged: { saveValue($0, forKey: "type") })
+                    DetailRow(title: "Größe:", text: Binding(
+                        get: { details.height },
+                        set: {
+                            details.height = $0
+                            nameStore.saveDetails(details, for: name)
+                        }
+                    ))
+                    DetailRow(title: "Haarfarbe:", text: Binding(
+                        get: { details.hairColor },
+                        set: {
+                            details.hairColor = $0
+                            nameStore.saveDetails(details, for: name)
+                        }
+                    ))
+                    DetailRow(title: "Augenfarbe:", text: Binding(
+                        get: { details.eyeColor },
+                        set: {
+                            details.eyeColor = $0
+                            nameStore.saveDetails(details, for: name)
+                        }
+                    ))
+                    DetailRow(title: "Merkmale:", text: Binding(
+                        get: { details.characteristics },
+                        set: {
+                            details.characteristics = $0
+                            nameStore.saveDetails(details, for: name)
+                        }
+                    ))
+                    DetailRow(title: "Style:", text: Binding(
+                        get: { details.style },
+                        set: {
+                            details.style = $0
+                            nameStore.saveDetails(details, for: name)
+                        }
+                    ))
+                    DetailRow(title: "Typ:", text: Binding(
+                        get: { details.type },
+                        set: {
+                            details.type = $0
+                            nameStore.saveDetails(details, for: name)
+                        }
+                    ), isLast: true)
                 }
                 .padding()
             }
         }
         .navigationTitle(" ")  // Empty title
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    if hasStoredData {
-                        showingUnfavoriteAlert = true
-                    } else {
-                        nameStore.toggleFavorite(name)
-                        dismiss()
-                    }
-                } label: {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.black)
-                }
-            }
-        }
-        .alert("Von Favoriten entfernen?", isPresented: $showingUnfavoriteAlert) {
-            Button("Abbrechen", role: .cancel) { }
-            Button("Entfernen", role: .destructive) {
-                nameStore.toggleFavorite(name)
-                dismiss()
-            }
-        } message: {
-            Text("Alle eingegebenen Daten gehen verloren.")
-        }
         .tint(.black)
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage)
         }
         .onAppear {
-            // Load saved values when view appears
-            height = loadValue(forKey: "height")
-            hairColor = loadValue(forKey: "hairColor")
-            eyeColor = loadValue(forKey: "eyeColor")
-            characteristics = loadValue(forKey: "characteristics")
-            style = loadValue(forKey: "style")
-            type = loadValue(forKey: "type")
+            details = nameStore.getDetails(for: name)
+            selectedImage = nameStore.loadImage(for: name)
         }
     }
 }

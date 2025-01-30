@@ -26,25 +26,23 @@ struct ContentView: View {
                 }
                 .tag(0)
             
-            if hasGeneratedNames {
-                NavigationStack {
-                    GeneratedNamesListView(
-                        names: viewModel.generatedNamesList?.names ?? [],
-                        sheetDetent: .constant(.large)
-                    )
-                    .environmentObject(nameStore)
-                }
-                .tabItem {
-                    Label("Historie", systemImage: isDrawerPresented ? "person.badge.clock.fill" : "person.badge.clock")
-                }
-                .tag(1)
+            NavigationStack {
+                GeneratedNamesListView(
+                    names: viewModel.nameHistory,
+                    sheetDetent: .constant(.large)
+                )
+                .environmentObject(nameStore)
             }
+            .tabItem {
+                Label("Historie", systemImage: isDrawerPresented ? "person.badge.clock.fill" : "person.badge.clock")
+            }
+            .tag(1)
             
             CollectionsView()
                 .tabItem {
                     Label("Favoriten", systemImage: "star.fill")
                 }
-                .tag(hasGeneratedNames ? 2 : 1)
+                .tag(2)
         }
     }
 }

@@ -163,7 +163,7 @@ struct NameGeneratorView: View {
             useDoubleName: allowDoppelnamen
         )
         
-        viewModel.generatedNamesList = GeneratedNamesList(names: names)
+        viewModel.addNamesToHistory(names)
         isDrawerPresented = true
         hasGeneratedNames = true
         print("Generated \(names.count) names")
@@ -177,6 +177,20 @@ struct NameGeneratorView: View {
 
 class GeneratorViewModel: ObservableObject {
     @Published var generatedNamesList: GeneratedNamesList?
+    @Published var nameHistory: [GermanName] = []
+    let maxHistorySize = 300
+    
+    func addNamesToHistory(_ names: [GermanName]) {
+        // Add new names at the beginning
+        nameHistory.insert(contentsOf: names, at: 0)
+        
+        // Trim to keep only the last 300 names
+        if nameHistory.count > maxHistorySize {
+            nameHistory = Array(nameHistory.prefix(maxHistorySize))
+        }
+        
+        generatedNamesList = GeneratedNamesList(names: names)
+    }
 }
 
 struct GeneratedNamesList: Identifiable {
