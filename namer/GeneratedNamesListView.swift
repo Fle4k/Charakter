@@ -2,7 +2,7 @@ import SwiftUI
 
 struct GeneratedNamesListView: View {
     let names: [GermanName]
-    @Environment(\.dismiss) private var dismiss
+    @Binding var sheetDetent: PresentationDetent
     @EnvironmentObject private var nameStore: NameStore
     
     var body: some View {
@@ -21,12 +21,14 @@ struct GeneratedNamesListView: View {
                                 .contentTransition(.symbolEffect(.replace))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        .frame(width: 32)  // Fixed width for star
+                        .frame(width: 32)
                         
                         // Name with context menu
                         Text("\(name.firstName) \(name.lastName)")
                             .foregroundStyle(.black)
-                            .padding(.leading, 8)  // Space between star and name
+                            .padding(.leading, 8)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
                             .contextMenu {
                                 Button(action: {
                                     UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
@@ -47,25 +49,21 @@ struct GeneratedNamesListView: View {
                 }
             }
             .listStyle(.plain)
+            .navigationTitle("Historie")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Fertig") {
-                        dismiss()
-                    }
-                }
-            }
         }
-        .tint(.black)
     }
 }
 
 #Preview {
     NavigationView {
-        GeneratedNamesListView(names: [
-            GermanName(firstName: "Max", lastName: "Mustermann", gender: .male, birthYear: 1990),
-            GermanName(firstName: "Erika", lastName: "Musterfrau", gender: .female, birthYear: 1992)
-        ])
+        GeneratedNamesListView(
+            names: [
+                GermanName(firstName: "Max", lastName: "Mustermann", gender: .male, birthYear: 1990),
+                GermanName(firstName: "Erika", lastName: "Musterfrau", gender: .female, birthYear: 1992)
+            ],
+            sheetDetent: .constant(.height(40))
+        )
         .environmentObject(NameStore())
     }
 }

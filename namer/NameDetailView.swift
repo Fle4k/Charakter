@@ -20,9 +20,14 @@ struct NameDetailView: View {
         UserDefaults.standard.set(value, forKey: "\(key)_\(name.id)")
     }
     
+    private func loadValue(forKey key: String) -> String {
+        UserDefaults.standard.string(forKey: "\(key)_\(name.id)") ?? ""
+    }
+    
     private var hasStoredData: Bool {
         !height.isEmpty || !hairColor.isEmpty || !eyeColor.isEmpty ||
-        !characteristics.isEmpty || !style.isEmpty || !type.isEmpty
+        !characteristics.isEmpty || !style.isEmpty || !type.isEmpty ||
+        selectedImage != nil
     }
     
     var body: some View {
@@ -36,12 +41,10 @@ struct NameDetailView: View {
                             .resizable()
                             .scaledToFill()
                             .frame(height: 200)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     } else {
                         Rectangle()
                             .fill(.gray.opacity(0.2))
                             .frame(height: 200)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
                             .overlay {
                                 Image(systemName: "camera.fill")
                                     .font(.system(size: 30))
@@ -49,22 +52,23 @@ struct NameDetailView: View {
                             }
                     }
                 }
-                .padding()
+                
+                Text("\(name.firstName) \(name.lastName)")
+                    .font(.title2)
+                    .bold()
                 
                 VStack(spacing: 0) {
-                    DetailRow(title: "Alter:", value: "\(Calendar.current.component(.year, from: Date()) - name.birthYear)", isEditable: false)
-                    DetailRow(title: "Geschlecht:", value: name.gender.rawValue, isEditable: false)
-                    DetailRow(title: "Größe:", text: $height)
-                    DetailRow(title: "Haarfarbe:", text: $hairColor)
-                    DetailRow(title: "Augenfarbe:", text: $eyeColor)
-                    DetailRow(title: "Merkmale:", text: $characteristics)
-                    DetailRow(title: "Style:", text: $style)
-                    DetailRow(title: "Typ:", text: $type, isLast: true)
+                    DetailRow(title: "Größe:", text: $height, onChanged: { saveValue($0, forKey: "height") })
+                    DetailRow(title: "Haarfarbe:", text: $hairColor, onChanged: { saveValue($0, forKey: "hairColor") })
+                    DetailRow(title: "Augenfarbe:", text: $eyeColor, onChanged: { saveValue($0, forKey: "eyeColor") })
+                    DetailRow(title: "Merkmale:", text: $characteristics, onChanged: { saveValue($0, forKey: "characteristics") })
+                    DetailRow(title: "Style:", text: $style, onChanged: { saveValue($0, forKey: "style") })
+                    DetailRow(title: "Typ:", text: $type, isLast: true, onChanged: { saveValue($0, forKey: "type") })
                 }
                 .padding()
             }
         }
-        .navigationTitle("\(name.firstName) \(name.lastName)")
+        .navigationTitle(" ")  // Empty title
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -81,8 +85,27 @@ struct NameDetailView: View {
                 }
             }
         }
+        .alert("Von Favoriten entfernen?", isPresented: $showingUnfavoriteAlert) {
+            Button("Abbrechen", role: .cancel) { }
+            Button("Entfernen", role: .destructive) {
+                nameStore.toggleFavorite(name)
+                dismiss()
+            }
+        } message: {
+            Text("Alle eingegebenen Daten gehen verloren.")
+        }
+        .tint(.black)
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage)
+        }
+        .onAppear {
+            // Load saved values when view appears
+            height = loadValue(forKey: "height")
+            hairColor = loadValue(forKey: "hairColor")
+            eyeColor = loadValue(forKey: "eyeColor")
+            characteristics = loadValue(forKey: "characteristics")
+            style = loadValue(forKey: "style")
+            type = loadValue(forKey: "type")
         }
     }
 }
@@ -93,6 +116,7 @@ struct DetailRow: View {
     var text: Binding<String>?
     var isEditable: Bool = true
     var isLast: Bool = false
+    var onChanged: ((String) -> Void)? = nil
     
     var body: some View {
         VStack(spacing: 0) {
@@ -105,6 +129,9 @@ struct DetailRow: View {
                         .multilineTextAlignment(.trailing)
                         .foregroundStyle(.secondary)
                         .submitLabel(.done)
+                        .onChange(of: text.wrappedValue) { _, newValue in
+                            onChanged?(newValue)
+                        }
                 } else {
                     Text(value)
                         .foregroundStyle(.secondary)

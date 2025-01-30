@@ -6,19 +6,9 @@ struct NamerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TabView {
-                NameGeneratorView()
-                    .tabItem {
-                        Label("Neuer Name", systemImage: "person")
-                    }
-                
-                CollectionsView()
-                    .tabItem {
-                        Label("Favoriten", systemImage: "star")
-                    }
-            }
-            .environmentObject(nameStore)
-            .tint(.black)
+            ContentView()
+                .environmentObject(nameStore)
+                .tint(.black)
         }
     }
 } 

@@ -13,12 +13,23 @@ struct CustomSegmentedPickerStyle: ViewModifier {
 
 struct NameGeneratorView: View {
     @EnvironmentObject var nameStore: NameStore
-    @State private var showingGeneratedNames = false
+    @ObservedObject var viewModel: GeneratorViewModel
     @State private var selectedGender: GermanName.NameGender = .female
     @State private var selectedAgeGroup: AgeGroup = .youngAdult
     @State private var allowDoppelnamen = false
     @State private var allowAlliteration = false
-    @StateObject private var viewModel = GeneratorViewModel()
+    @State private var restrictAge = false
+    @State private var sheetDetent: PresentationDetent = .large
+    @Binding var isDrawerPresented: Bool
+    @Binding var hasGeneratedNames: Bool
+    
+    init(isDrawerPresented: Binding<Bool>,
+         hasGeneratedNames: Binding<Bool>,
+         viewModel: GeneratorViewModel) {
+        _isDrawerPresented = isDrawerPresented
+        _hasGeneratedNames = hasGeneratedNames
+        self.viewModel = viewModel
+    }
     
     var birthYear: Int {
         let currentYear = Calendar.current.component(.year, from: Date())
@@ -34,95 +45,101 @@ struct NameGeneratorView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Gender Picker
-            Picker("Gender", selection: $selectedGender) {
-                ForEach(GermanName.NameGender.allCases, id: \.self) { gender in
-                    Text(gender.rawValue).tag(gender)
-                }
-            }
-            .pickerStyle(.segmented)
-            .modifier(CustomSegmentedPickerStyle())
-            .padding(.horizontal)
-            
-            // Age Group Section
-            VStack(spacing: 8) {
-                VStack(spacing: 0) {
-                    Picker("Age", selection: $selectedAgeGroup) {
-                        Text("Kleinkinder").tag(AgeGroup.child)
-                        Text("Kinder").tag(AgeGroup.child)
-                        Text("Teenager").tag(AgeGroup.teenager)
-                        Text("Junge Erwachsene").tag(AgeGroup.youngAdult)
-                        Text("Erwachsene").tag(AgeGroup.adult)
-                        Text("Mittleres Erwachsenenalter").tag(AgeGroup.middleAge)
-                        Text("SeniorInnen").tag(AgeGroup.senior)
-                        Text("Hochbetagte").tag(AgeGroup.elderly)
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 120)
-                    .clipped()
-                    .overlay(
-                        VStack(spacing: 0) {
-                            LinearGradient(
-                                colors: [Color(.systemBackground), Color(.systemBackground).opacity(0)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .frame(height: 40)
-                            
-                            Spacer()
-                            
-                            LinearGradient(
-                                colors: [Color(.systemBackground).opacity(0), Color(.systemBackground)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .frame(height: 40)
-                        }
-                    )
+        NavigationStack {
+            GeometryReader { geometry in
+                VStack(spacing: 20) {
+                    Spacer()
+                        .frame(height: geometry.size.height * 0.08)  // 8% of screen height
                     
-                    Text(decadeText(for: birthYear))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .padding()
+                    // Gender Picker
+                    Picker("Gender", selection: $selectedGender) {
+                        ForEach(GermanName.NameGender.allCases, id: \.self) { gender in
+                            Text(gender.rawValue).tag(gender)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .modifier(CustomSegmentedPickerStyle())
+                    .padding(.horizontal)
+                    
+                    Spacer()
+                        .frame(height: geometry.size.height * 0.04)  // 4% spacing between picker and toggles
+                    
+                    // Toggles in top third
+                    VStack(spacing: 0) {
+                        Toggle("Alliteration", isOn: $allowAlliteration)
+                            .padding()
+                            .tint(.black)
+                        
+                        Divider()
+                            .padding(.horizontal)
+                            .background(.black)
+                        
+                        Toggle("Doppelnamen", isOn: $allowDoppelnamen)
+                            .padding()
+                            .tint(.black)
+                        
+                        Divider()
+                            .padding(.horizontal)
+                            .background(.black)
+                        
+                        Toggle("Auf Alter beschränken", isOn: $restrictAge)
+                            .padding()
+                            .tint(.black)
+                    }
+                    .padding(.horizontal)
+                    
+                    if restrictAge {
+                        VStack(spacing: 8) {
+                            Picker("Age", selection: $selectedAgeGroup) {
+                                Text("Kleinkinder").tag(AgeGroup.child)
+                                Text("Kinder").tag(AgeGroup.child)
+                                Text("Teenager").tag(AgeGroup.teenager)
+                                Text("Junge Erwachsene").tag(AgeGroup.youngAdult)
+                                Text("Erwachsene").tag(AgeGroup.adult)
+                                Text("Mittleres Erwachsenenalter").tag(AgeGroup.middleAge)
+                                Text("SeniorInnen").tag(AgeGroup.senior)
+                                Text("Hochbetagte").tag(AgeGroup.elderly)
+                            }
+                            .pickerStyle(.wheel)
+                            
+                            Text(decadeText(for: birthYear))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .padding()
+                        }
+                        .padding(.horizontal)
+                    }
+                    
+                    Spacer()
+                    
+                    // Generate Button
+                    Button(action: generateAndShowNames) {
+                        Text("Namen Generieren!")
+                            .font(.title3)
+                            .bold()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(.black)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, geometry.size.height * 0.05)  // 5% of screen height
                 }
             }
-            .padding(.horizontal)
-            
-            // Toggles
-            VStack(spacing: 0) {
-                Toggle("Alliteration", isOn: $allowAlliteration)
-                    .padding()
-                    .tint(.black)
-                
-                Divider()
-                    .padding(.horizontal)
-                    .background(.black)
-                
-                Toggle("Doppelnamen", isOn: $allowDoppelnamen)
-                    .padding()
-                    .tint(.black)
-            }
-            .padding()
-            
-            // Generate Button
-            Button(action: generateAndShowNames) {
-                Text("Namen Generieren!")
-                    .font(.title3)
-                    .bold()
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(.black)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.horizontal)
         }
-        .sheet(isPresented: $showingGeneratedNames) {
+        .sheet(isPresented: $isDrawerPresented) {
             NavigationStack {
-                GeneratedNamesListView(names: viewModel.generatedNames)
-                    .environmentObject(nameStore)
+                GeneratedNamesListView(
+                    names: viewModel.generatedNamesList?.names ?? [],
+                    sheetDetent: $sheetDetent
+                )
+                .environmentObject(nameStore)
+                .tint(.black)
             }
+            .presentationDetents([.large], selection: $sheetDetent)
+            .presentationDragIndicator(.visible)
+            .presentationBackgroundInteraction(.enabled)
         }
     }
     
@@ -139,16 +156,17 @@ struct NameGeneratorView: View {
     }
     
     private func generateAndShowNames() {
-        viewModel.generatedNames = GermanName.generateNames(
-            count: 50,
+        let names = GermanName.generateNames(
             gender: selectedGender,
-            birthYear: birthYear,
+            birthYear: restrictAge ? birthYear : Calendar.current.component(.year, from: Date()) - 25,
             useAlliteration: allowAlliteration,
             useDoubleName: allowDoppelnamen
         )
         
-        print("Generated \(viewModel.generatedNames.count) names")
-        showingGeneratedNames = true
+        viewModel.generatedNamesList = GeneratedNamesList(names: names)
+        isDrawerPresented = true
+        hasGeneratedNames = true
+        print("Generated \(names.count) names")
     }
     
     private func decadeText(for year: Int) -> String {
@@ -158,10 +176,15 @@ struct NameGeneratorView: View {
 }
 
 class GeneratorViewModel: ObservableObject {
-    @Published var generatedNames: [GermanName] = []
+    @Published var generatedNamesList: GeneratedNamesList?
+}
+
+struct GeneratedNamesList: Identifiable {
+    let id = UUID()
+    let names: [GermanName]
 }
 
 #Preview {
-    NameGeneratorView()
+    NameGeneratorView(isDrawerPresented: .constant(false), hasGeneratedNames: .constant(false), viewModel: GeneratorViewModel())
         .environmentObject(NameStore())
 }
