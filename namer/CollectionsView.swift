@@ -4,19 +4,33 @@ struct CollectionsView: View {
     @EnvironmentObject private var nameStore: NameStore
     @State private var nameToUnfavorite: GermanName?
     @State private var showingUnfavoriteAlert = false
+    @State private var showingDeleteAlert = false
+    @State private var selectedNamesHaveData = false
+    @State private var isSelectionMode = false
+    @State private var selectedNames: Set<String> = []
     
     var body: some View {
         NavigationStack {
             List {
                 ForEach(nameStore.favoriteNames) { name in
                     HStack(spacing: 0) {
-                        // Leading star button (filled, can unfavorite)
+                        // Leading selection circle or star
                         Button {
-                            handleUnfavorite(name)
+                            if isSelectionMode {
+                                toggleSelection(name)
+                            } else {
+                                handleUnfavorite(name)
+                            }
                         } label: {
-                            Image(systemName: "star.fill")
-                                .foregroundStyle(.black)
-                                .contentTransition(.symbolEffect(.replace))
+                            if isSelectionMode {
+                                Image(systemName: selectedNames.contains(name.id) ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(.black)
+                                    .contentTransition(.symbolEffect(.replace))
+                            } else {
+                                Image(systemName: "star.fill")
+                                    .foregroundStyle(.black)
+                                    .contentTransition(.symbolEffect(.replace))
+                            }
                         }
                         .buttonStyle(PlainButtonStyle())
                         .frame(width: 32)
@@ -34,18 +48,22 @@ struct CollectionsView: View {
                                     Label("Kopieren", systemImage: "doc.on.doc")
                                 }
                                 
-                                Button(role: .destructive) {
-                                    handleUnfavorite(name)
-                                } label: {
-                                    Label("Entfernen", systemImage: "star.slash")
+                                if !isSelectionMode {
+                                    Button(role: .destructive) {
+                                        handleUnfavorite(name)
+                                    } label: {
+                                        Label("Entfernen", systemImage: "star.slash")
+                                    }
                                 }
                             }
                         
                         Spacer()
                         
-                        // Navigation chevron
-                        NavigationLink(destination: NameDetailView(name: name)) {
-                            EmptyView()
+                        // Navigation chevron (only when not in selection mode)
+                        if !isSelectionMode {
+                            NavigationLink(destination: NameDetailView(name: name)) {
+                                EmptyView()
+                            }
                         }
                     }
                 }
@@ -53,6 +71,41 @@ struct CollectionsView: View {
             .listStyle(.plain)
             .navigationTitle("Favoriten")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if nameStore.favoriteNames.isEmpty {
+                        EmptyView()
+                    } else if isSelectionMode {
+                        Button(role: .destructive) {
+                            deleteSelected()
+                        } label: {
+                            Text("Löschen (\(selectedNames.count))")
+                                .foregroundStyle(.red)
+                        }
+                        .disabled(selectedNames.isEmpty)
+                    } else {
+                        Button {
+                            withAnimation {
+                                isSelectionMode.toggle()
+                                selectedNames.removeAll()
+                            }
+                        } label: {
+                            Text("Auswählen")
+                        }
+                    }
+                }
+                
+                if isSelectionMode {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Abbrechen") {
+                            withAnimation {
+                                isSelectionMode = false
+                                selectedNames.removeAll()
+                            }
+                        }
+                    }
+                }
+            }
             .overlay {
                 if nameStore.favoriteNames.isEmpty {
                     ContentUnavailableView {
@@ -64,18 +117,24 @@ struct CollectionsView: View {
             }
         }
         .alert(
-            "Name entfernen?",
-            isPresented: $showingUnfavoriteAlert,
-            presenting: nameToUnfavorite
-        ) { name in
+            "Namen entfernen?",
+            isPresented: $showingDeleteAlert
+        ) {
             Button("Abbrechen", role: .cancel) {}
             Button("Entfernen", role: .destructive) {
-                withAnimation {
+                // Delete all selected names
+                for name in nameStore.favoriteNames where selectedNames.contains(name.id) {
                     nameStore.toggleFavorite(name)
                 }
+                isSelectionMode = false
+                selectedNames.removeAll()
             }
-        } message: { name in
-            Text("Möchtest du '\(name.firstName) \(name.lastName)' wirklich aus deinen Favoriten entfernen? Alle gespeicherten Informationen gehen dabei verloren.")
+        } message: {
+            if selectedNamesHaveData {
+                Text("Möchtest du \(selectedNames.count) Namen wirklich aus deinen Favoriten entfernen? Bei einigen Namen gehen dabei gespeicherte Informationen verloren.")
+            } else {
+                Text("Möchtest du \(selectedNames.count) Namen wirklich aus deinen Favoriten entfernen?")
+            }
         }
         .onShake {
             nameStore.undoRecentRemovals()
@@ -91,6 +150,24 @@ struct CollectionsView: View {
                 nameStore.toggleFavorite(name)
             }
         }
+    }
+    
+    private func toggleSelection(_ name: GermanName) {
+        if selectedNames.contains(name.id) {
+            selectedNames.remove(name.id)
+        } else {
+            selectedNames.insert(name.id)
+        }
+    }
+    
+    private func deleteSelected() {
+        // Check if any selected names have data
+        let namesWithData = nameStore.favoriteNames.filter { name in
+            selectedNames.contains(name.id) && nameStore.hasAdditionalData(name)
+        }
+        
+        selectedNamesHaveData = !namesWithData.isEmpty
+        showingDeleteAlert = true
     }
 }
 
