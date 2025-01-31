@@ -21,7 +21,8 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             NameGeneratorView(
                 isDrawerPresented: $isDrawerPresented,
-                hasGeneratedNames: $hasGeneratedNames
+                hasGeneratedNames: $hasGeneratedNames,
+                viewModel: viewModel
             )
                 .tint(Color.dynamicText)
                 .tabItem {

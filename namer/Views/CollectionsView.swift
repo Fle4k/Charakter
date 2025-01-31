@@ -82,9 +82,15 @@ struct CollectionsView: View {
                 }
             }
             .listStyle(.plain)
-            .navigationTitle("Favoriten")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Favoriten")
+                        .font(.headline)
+                        .foregroundStyle(Color.dynamicText)
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if nameStore.favoriteNames.isEmpty {
                         EmptyView()

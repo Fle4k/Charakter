@@ -30,15 +30,19 @@ struct NameDetailView: View {
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFill()
-                            .frame(height: 200)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 300)
+                            .clipped()
                     } else {
                         Rectangle()
                             .fill(Color.dynamicText.opacity(0.2))
-                            .frame(height: 200)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 300)
                             .overlay {
                                 Image(systemName: "camera.fill")
                                     .font(.system(size: 30))
-                                    .foregroundStyle(Color.dynamicText.opacity(0.6))
+                                    .foregroundStyle(Color.dynamicText.opacity(0.2))
+                                    .offset(y:16)
                             }
                     }
                 }
@@ -101,9 +105,11 @@ struct NameDetailView: View {
                 }
                 .padding()
             }
+            .padding(.top, 0)
         }
-        .navigationTitle(" ")  // Empty title
+        .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("")
         .tint(Color.dynamicText)
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage)

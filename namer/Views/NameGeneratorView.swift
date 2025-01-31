@@ -19,7 +19,7 @@ struct CustomSegmentedPickerStyle: ViewModifier {
 
 struct NameGeneratorView: View {
     @EnvironmentObject var nameStore: NameStore
-    @StateObject private var viewModel = GeneratorViewModel()
+    @ObservedObject var viewModel: GeneratorViewModel
     @State private var selectedGender: GermanName.NameGender = .female
     @State private var selectedAgeGroup: AgeGroup = .youngAdult
     @State private var allowDoppelnamen = false
@@ -31,9 +31,11 @@ struct NameGeneratorView: View {
     @Environment(\.colorScheme) var colorScheme
     
     init(isDrawerPresented: Binding<Bool>,
-         hasGeneratedNames: Binding<Bool>) {
+         hasGeneratedNames: Binding<Bool>,
+         viewModel: GeneratorViewModel) {
         _isDrawerPresented = isDrawerPresented
         _hasGeneratedNames = hasGeneratedNames
+        self.viewModel = viewModel
     }
     
     var birthYear: Int {
@@ -150,7 +152,7 @@ struct NameGeneratorView: View {
         .sheet(isPresented: $isDrawerPresented) {
             NavigationStack {
                 VStack(spacing: 0) {
-                    Color.clear.frame(height: 40)
+                    Color.clear.frame(height: 60)
                     
                     GeneratedNamesListView(
                         names: viewModel.generatedNamesList?.names ?? [],
@@ -200,6 +202,5 @@ struct NameGeneratorView: View {
 }
 
 #Preview {
-    NameGeneratorView(isDrawerPresented: .constant(false), hasGeneratedNames: .constant(false))
-        .environmentObject(NameStore())
+    NameGeneratorView(isDrawerPresented: .constant(false), hasGeneratedNames: .constant(false), viewModel: GeneratorViewModel())
 }
