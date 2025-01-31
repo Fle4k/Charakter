@@ -8,7 +8,7 @@ struct NamerApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(nameStore)
-                .tint(.black)
+                .tint(Color.dynamicText)
         }
     }
 } 

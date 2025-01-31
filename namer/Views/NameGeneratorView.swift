@@ -1,19 +1,25 @@
 import SwiftUI
 
 struct CustomSegmentedPickerStyle: ViewModifier {
+    @Environment(\.colorScheme) var colorScheme
+    
     func body(content: Content) -> some View {
         content
             .onAppear {
-                UISegmentedControl.appearance().selectedSegmentTintColor = .black
-                UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-                UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+                UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(Color.dynamicFill)
+                UISegmentedControl.appearance().setTitleTextAttributes(
+                    [.foregroundColor: UIColor(Color.dynamicBackground)],
+                    for: .selected)
+                UISegmentedControl.appearance().setTitleTextAttributes(
+                    [.foregroundColor: UIColor(Color.dynamicText)],
+                    for: .normal)
             }
     }
 }
 
 struct NameGeneratorView: View {
     @EnvironmentObject var nameStore: NameStore
-    @ObservedObject var viewModel: GeneratorViewModel
+    @StateObject private var viewModel = GeneratorViewModel()
     @State private var selectedGender: GermanName.NameGender = .female
     @State private var selectedAgeGroup: AgeGroup = .youngAdult
     @State private var allowDoppelnamen = false
@@ -22,13 +28,12 @@ struct NameGeneratorView: View {
     @State private var sheetDetent: PresentationDetent = .large
     @Binding var isDrawerPresented: Bool
     @Binding var hasGeneratedNames: Bool
+    @Environment(\.colorScheme) var colorScheme
     
     init(isDrawerPresented: Binding<Bool>,
-         hasGeneratedNames: Binding<Bool>,
-         viewModel: GeneratorViewModel) {
+         hasGeneratedNames: Binding<Bool>) {
         _isDrawerPresented = isDrawerPresented
         _hasGeneratedNames = hasGeneratedNames
-        self.viewModel = viewModel
     }
     
     var birthYear: Int {
@@ -42,6 +47,10 @@ struct NameGeneratorView: View {
         case .senior: return currentYear - 70
         case .elderly: return currentYear - 85
         }
+    }
+    
+    var toggleTint: Color {
+        colorScheme == .dark ? Color.dynamicText.opacity(0.6) : Color.dynamicFill
     }
     
     var body: some View {
@@ -68,23 +77,24 @@ struct NameGeneratorView: View {
                     VStack(spacing: 0) {
                         Toggle("Alliteration", isOn: $allowAlliteration)
                             .padding()
-                            .tint(.black)
+                            .tint(toggleTint)
+                            .foregroundStyle(Color.dynamicText)
                         
-                        Divider()
-                            .padding(.horizontal)
-                            .background(.black)
+                        Divider()  // Keep only one divider
+                            .background(Color.dynamicText.opacity(0.2))  // Make it slightly transparent
                         
                         Toggle("Doppelnamen", isOn: $allowDoppelnamen)
                             .padding()
-                            .tint(.black)
+                            .tint(toggleTint)
+                            .foregroundStyle(Color.dynamicText)
                         
-                        Divider()
-                            .padding(.horizontal)
-                            .background(.black)
+                        Divider()  // Keep only one divider
+                            .background(Color.dynamicText.opacity(0.2))
                         
                         Toggle("Auf Alter beschränken", isOn: $restrictAge)
                             .padding()
-                            .tint(.black)
+                            .tint(toggleTint)
+                            .foregroundStyle(Color.dynamicText)
                     }
                     .padding(.horizontal)
                     
@@ -92,19 +102,27 @@ struct NameGeneratorView: View {
                         VStack(spacing: 8) {
                             Picker("Age", selection: $selectedAgeGroup) {
                                 Text("Kleinkinder").tag(AgeGroup.child)
+                                    .foregroundStyle(Color.dynamicText)
                                 Text("Kinder").tag(AgeGroup.child)
+                                    .foregroundStyle(Color.dynamicText)
                                 Text("Teenager").tag(AgeGroup.teenager)
+                                    .foregroundStyle(Color.dynamicText)
                                 Text("Junge Erwachsene").tag(AgeGroup.youngAdult)
+                                    .foregroundStyle(Color.dynamicText)
                                 Text("Erwachsene").tag(AgeGroup.adult)
+                                    .foregroundStyle(Color.dynamicText)
                                 Text("Mittleres Erwachsenenalter").tag(AgeGroup.middleAge)
+                                    .foregroundStyle(Color.dynamicText)
                                 Text("SeniorInnen").tag(AgeGroup.senior)
+                                    .foregroundStyle(Color.dynamicText)
                                 Text("Hochbetagte").tag(AgeGroup.elderly)
+                                    .foregroundStyle(Color.dynamicText)
                             }
                             .pickerStyle(.wheel)
                             
                             Text(decadeText(for: birthYear))
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.dynamicText.opacity(0.6))
                                 .padding()
                         }
                         .padding(.horizontal)
@@ -119,8 +137,8 @@ struct NameGeneratorView: View {
                             .bold()
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(.black)
-                            .foregroundColor(.white)
+                            .background(Color.dynamicFill)
+                            .foregroundColor(Color.dynamicBackground)
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
@@ -128,18 +146,24 @@ struct NameGeneratorView: View {
                 }
             }
         }
+        .tint(Color.dynamicText)
         .sheet(isPresented: $isDrawerPresented) {
             NavigationStack {
-                GeneratedNamesListView(
-                    names: viewModel.generatedNamesList?.names ?? [],
-                    sheetDetent: $sheetDetent
-                )
-                .environmentObject(nameStore)
-                .tint(.black)
+                VStack(spacing: 0) {
+                    Color.clear.frame(height: 40)
+                    
+                    GeneratedNamesListView(
+                        names: viewModel.generatedNamesList?.names ?? [],
+                        sheetDetent: $sheetDetent
+                    )
+                    .environmentObject(nameStore)
+                    .tint(Color.dynamicText)
+                }
             }
             .presentationDetents([.large], selection: $sheetDetent)
             .presentationDragIndicator(.visible)
             .presentationBackgroundInteraction(.enabled)
+            .tint(Color.dynamicText)
         }
     }
     
@@ -175,30 +199,7 @@ struct NameGeneratorView: View {
     }
 }
 
-class GeneratorViewModel: ObservableObject {
-    @Published var generatedNamesList: GeneratedNamesList?
-    @Published var nameHistory: [GermanName] = []
-    let maxHistorySize = 300
-    
-    func addNamesToHistory(_ names: [GermanName]) {
-        // Add new names at the beginning
-        nameHistory.insert(contentsOf: names, at: 0)
-        
-        // Trim to keep only the last 300 names
-        if nameHistory.count > maxHistorySize {
-            nameHistory = Array(nameHistory.prefix(maxHistorySize))
-        }
-        
-        generatedNamesList = GeneratedNamesList(names: names)
-    }
-}
-
-struct GeneratedNamesList: Identifiable {
-    let id = UUID()
-    let names: [GermanName]
-}
-
 #Preview {
-    NameGeneratorView(isDrawerPresented: .constant(false), hasGeneratedNames: .constant(false), viewModel: GeneratorViewModel())
+    NameGeneratorView(isDrawerPresented: .constant(false), hasGeneratedNames: .constant(false))
         .environmentObject(NameStore())
 }

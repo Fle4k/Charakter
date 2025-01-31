@@ -10,17 +10,20 @@ struct ContentView: View {
     init() {
         // Customize tab bar appearance
         let appearance = UITabBarAppearance()
-        appearance.stackedLayoutAppearance.selected.iconColor = .black
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.black]
+        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.dynamicText)
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes =
+            [.foregroundColor: UIColor(Color.dynamicText)]
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            NameGeneratorView(isDrawerPresented: $isDrawerPresented,
-                             hasGeneratedNames: $hasGeneratedNames,
-                             viewModel: viewModel)
+            NameGeneratorView(
+                isDrawerPresented: $isDrawerPresented,
+                hasGeneratedNames: $hasGeneratedNames
+            )
+                .tint(Color.dynamicText)
                 .tabItem {
                     Label("Neuer Name", systemImage: "person")
                 }
@@ -33,12 +36,14 @@ struct ContentView: View {
                 )
                 .environmentObject(nameStore)
             }
+            .tint(Color.dynamicText)
             .tabItem {
                 Label("Historie", systemImage: isDrawerPresented ? "person.badge.clock.fill" : "person.badge.clock")
             }
             .tag(1)
             
             CollectionsView()
+                .tint(Color.dynamicText)
                 .tabItem {
                     Label("Favoriten", systemImage: "star.fill")
                 }

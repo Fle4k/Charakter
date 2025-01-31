@@ -24,11 +24,11 @@ struct CollectionsView: View {
                         } label: {
                             if isSelectionMode {
                                 Image(systemName: selectedNames.contains(name.id) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(Color.dynamicText)
                                     .contentTransition(.symbolEffect(.replace))
                             } else {
                                 Image(systemName: "star.fill")
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(Color.dynamicText)
                                     .contentTransition(.symbolEffect(.replace))
                             }
                         }
@@ -36,26 +36,38 @@ struct CollectionsView: View {
                         .frame(width: 32)
                         
                         // Name with context menu
-                        Text("\(name.firstName) \(name.lastName)")
-                            .foregroundStyle(.black)
-                            .padding(.leading, 8)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                            .contextMenu {
-                                Button(action: {
-                                    UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
-                                }) {
-                                    Label("Kopieren", systemImage: "doc.on.doc")
-                                }
-                                
-                                if !isSelectionMode {
-                                    Button(role: .destructive) {
-                                        handleUnfavorite(name)
-                                    } label: {
-                                        Label("Entfernen", systemImage: "star.slash")
-                                    }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(name.firstName) \(name.lastName)")
+                                .foregroundStyle(Color.dynamicText)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            
+                            let details = nameStore.getDetails(for: name)
+                            if !details.hashtag.isEmpty {
+                                Text("#\(details.hashtag)")
+                                    .font(.caption)
+                                    .foregroundStyle(Color.dynamicText.opacity(0.6))
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                            }
+                        }
+                        .padding(.leading, 8)
+                        .contextMenu {
+                            Button(action: {
+                                UIPasteboard.general.string = "\(name.firstName) \(name.lastName)"
+                            }) {
+                                Label("Kopieren", systemImage: "doc.on.doc")
+                            }
+                            
+                            if !isSelectionMode {
+                                Button(role: .destructive) {
+                                    handleUnfavorite(name)
+                                } label: {
+                                    Label("Entfernen", systemImage: "star.slash")
+                                        .foregroundStyle(Color.dynamicText)
                                 }
                             }
+                        }
                         
                         Spacer()
                         
@@ -64,6 +76,7 @@ struct CollectionsView: View {
                             NavigationLink(destination: NameDetailView(name: name)) {
                                 EmptyView()
                             }
+                            .tint(Color.dynamicText)
                         }
                     }
                 }
@@ -80,17 +93,30 @@ struct CollectionsView: View {
                             deleteSelected()
                         } label: {
                             Text("Löschen (\(selectedNames.count))")
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.dynamicText)
                         }
                         .disabled(selectedNames.isEmpty)
                     } else {
-                        Button {
-                            withAnimation {
-                                isSelectionMode.toggle()
-                                selectedNames.removeAll()
+                        Menu {
+                            Button {
+                                withAnimation {
+                                    isSelectionMode.toggle()
+                                    selectedNames.removeAll()
+                                }
+                            } label: {
+                                Label("Auswählen", systemImage: "checkmark.circle")
+                            }
+                            
+                            Button(role: .destructive) {
+                                selectedNames = Set(nameStore.favoriteNames.map { $0.id })
+                                selectedNamesHaveData = nameStore.favoriteNames.contains { nameStore.hasAdditionalData($0) }
+                                showingDeleteAlert = true
+                            } label: {
+                                Label("Alle löschen", systemImage: "trash")
                             }
                         } label: {
-                            Text("Auswählen")
+                            Image(systemName: "ellipsis")
+                                .foregroundStyle(Color.dynamicText)
                         }
                     }
                 }
@@ -110,8 +136,10 @@ struct CollectionsView: View {
                 if nameStore.favoriteNames.isEmpty {
                     ContentUnavailableView {
                         Label("Keine Favoriten", systemImage: "star")
+                            .foregroundStyle(Color.dynamicText)
                     } description: {
                         Text("Favorisierte Namen erscheinen hier")
+                            .foregroundStyle(Color.dynamicText.opacity(0.6))
                     }
                 }
             }
@@ -134,8 +162,10 @@ struct CollectionsView: View {
                 Text("Möchtest du \(selectedNames.count) Namen wirklich aus deinen Favoriten entfernen? Bei einigen Namen gehen dabei gespeicherte Informationen verloren.")
             } else {
                 Text("Möchtest du \(selectedNames.count) Namen wirklich aus deinen Favoriten entfernen?")
+                    .foregroundStyle(Color.dynamicText)
             }
         }
+        .tint(Color.dynamicText)
         .onShake {
             nameStore.undoRecentRemovals()
         }

@@ -13,10 +13,16 @@ struct GeneratedNamesListView: View {
                 HStack(spacing: 0) {
                     // Leading star button
                     Button {
-                        handleUnfavorite(name)
+                        if nameStore.favoriteNames.contains(where: { $0.id == name.id }) {
+                            handleUnfavorite(name)
+                        } else {
+                            withAnimation {
+                                nameStore.toggleFavorite(name)
+                            }
+                        }
                     } label: {
                         Image(systemName: nameStore.favoriteNames.contains(where: { $0.id == name.id }) ? "star.fill" : "star")
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.dynamicText)
                             .contentTransition(.symbolEffect(.replace))
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -24,7 +30,7 @@ struct GeneratedNamesListView: View {
                     
                     // Name with context menu
                     Text("\(name.firstName) \(name.lastName)")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(Color.dynamicText)
                         .padding(.leading, 8)
                         .lineLimit(1)
                         .truncationMode(.tail)
@@ -38,18 +44,20 @@ struct GeneratedNamesListView: View {
                     
                     Spacer()
                     
-                    // Navigation chevron (only when favorited)
+                    // Navigation chevron
                     if nameStore.favoriteNames.contains(where: { $0.id == name.id }) {
                         NavigationLink(destination: NameDetailView(name: name)) {
                             EmptyView()
                         }
+                        .tint(Color.dynamicText)
                     }
                 }
             }
         }
         .listStyle(.plain)
-        .navigationTitle("Historie")
+        .navigationTitle("")  // Empty title for sheet
         .navigationBarTitleDisplayMode(.inline)
+        .tint(Color.dynamicText)
         .alert(
             "Name entfernen?",
             isPresented: $showingUnfavoriteAlert,
@@ -67,22 +75,10 @@ struct GeneratedNamesListView: View {
     }
     
     private func handleUnfavorite(_ name: GermanName) {
-        if nameStore.favoriteNames.contains(where: { $0.id == name.id }) {
-            print("Unfavoriting \(name.firstName)")
-            // Only check for data if we're unfavoriting
-            if nameStore.hasAdditionalData(name) {
-                print("Has additional data, showing alert")
-                nameToUnfavorite = name
-                showingUnfavoriteAlert = true
-            } else {
-                print("No additional data, removing directly")
-                withAnimation {
-                    nameStore.toggleFavorite(name)
-                }
-            }
+        if nameStore.hasAdditionalData(name) {
+            nameToUnfavorite = name
+            showingUnfavoriteAlert = true
         } else {
-            print("Favoriting \(name.firstName)")
-            // If we're favoriting, just do it
             withAnimation {
                 nameStore.toggleFavorite(name)
             }

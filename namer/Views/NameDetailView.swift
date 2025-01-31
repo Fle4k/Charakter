@@ -16,6 +16,7 @@ struct NameDetailView: View {
         !details.characteristics.isEmpty ||
         !details.style.isEmpty ||
         !details.type.isEmpty ||
+        !details.hashtag.isEmpty ||
         selectedImage != nil
     }
     
@@ -32,12 +33,12 @@ struct NameDetailView: View {
                             .frame(height: 200)
                     } else {
                         Rectangle()
-                            .fill(.gray.opacity(0.2))
+                            .fill(Color.dynamicText.opacity(0.2))
                             .frame(height: 200)
                             .overlay {
                                 Image(systemName: "camera.fill")
                                     .font(.system(size: 30))
-                                    .foregroundStyle(.gray)
+                                    .foregroundStyle(Color.dynamicText.opacity(0.6))
                             }
                     }
                 }
@@ -45,6 +46,7 @@ struct NameDetailView: View {
                 Text("\(name.firstName) \(name.lastName)")
                     .font(.title2)
                     .bold()
+                    .foregroundStyle(Color.dynamicText)
                 
                 VStack(spacing: 0) {
                     DetailRow(title: "Größe:", text: Binding(
@@ -88,14 +90,21 @@ struct NameDetailView: View {
                             details.type = $0
                             nameStore.saveDetails(details, for: name)
                         }
-                    ), isLast: true)
+                    ))
+                    DetailRow(title: "# :", text: Binding(
+                        get: { details.hashtag },
+                        set: {
+                            details.hashtag = $0
+                            nameStore.saveDetails(details, for: name)
+                        }
+                    ), placeholder: "z.B. Projektname", isLast: true)
                 }
                 .padding()
             }
         }
         .navigationTitle(" ")  // Empty title
         .navigationBarTitleDisplayMode(.inline)
-        .tint(.black)
+        .tint(Color.dynamicText)
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage)
         }
@@ -110,6 +119,7 @@ struct DetailRow: View {
     let title: String
     var value: String = ""
     var text: Binding<String>?
+    var placeholder: String = ""
     var isEditable: Bool = true
     var isLast: Bool = false
     var onChanged: ((String) -> Void)? = nil
@@ -121,16 +131,16 @@ struct DetailRow: View {
                     .font(.body)
                 Spacer()
                 if isEditable, let text = text {
-                    TextField("", text: text)
+                    TextField(placeholder, text: text)
                         .multilineTextAlignment(.trailing)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.dynamicText.opacity(0.6))
                         .submitLabel(.done)
                         .onChange(of: text.wrappedValue) { _, newValue in
                             onChanged?(newValue)
                         }
                 } else {
                     Text(value)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.dynamicText.opacity(0.6))
                 }
             }
             .padding(.horizontal)
@@ -138,6 +148,7 @@ struct DetailRow: View {
             
             if !isLast {
                 Divider()
+                    .background(Color.dynamicText.opacity(0.2))
                     .padding(.leading)
             }
         }
