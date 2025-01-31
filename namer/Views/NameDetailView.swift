@@ -35,15 +35,23 @@ struct NameDetailView: View {
                             .clipped()
                     } else {
                         Rectangle()
-                            .fill(Color.dynamicText.opacity(0.2))
+                            .fill(.clear)
                             .frame(maxWidth: .infinity)
                             .frame(height: 300)
-                            .overlay {
-                                Image(systemName: "camera.fill")
-                                    .font(.system(size: 30))
-                                    .foregroundStyle(Color.dynamicText.opacity(0.2))
-                                    .offset(y:16)
-                            }
+                    }
+                }
+                .contextMenu {
+                    Button {
+                        showingImagePicker = true
+                    } label: {
+                        Label("Foto hinzufügen", systemImage: "photo")
+                    }
+                    
+                    Button(role: .destructive) {
+                        nameStore.toggleFavorite(name)
+                        dismiss()
+                    } label: {
+                        Label("Von Favoriten entfernen", systemImage: "star.slash")
                     }
                 }
                 
@@ -51,6 +59,7 @@ struct NameDetailView: View {
                     .font(.title2)
                     .bold()
                     .foregroundStyle(Color.dynamicText)
+                    .padding(.top, -10)  // Adjust spacing after the image area
                 
                 VStack(spacing: 0) {
                     DetailRow(title: "Größe:", text: Binding(
@@ -110,6 +119,27 @@ struct NameDetailView: View {
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button {
+                        showingImagePicker = true
+                    } label: {
+                        Label("Foto hinzufügen", systemImage: "photo")
+                    }
+                    
+                    Button(role: .destructive) {
+                        nameStore.toggleFavorite(name)
+                        dismiss()
+                    } label: {
+                        Label("Von Favoriten entfernen", systemImage: "star.slash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundStyle(Color.dynamicText)
+                }
+            }
+        }
         .tint(Color.dynamicText)
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage)

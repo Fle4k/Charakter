@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var hasGeneratedNames = false
     @EnvironmentObject private var nameStore: NameStore
     @StateObject private var viewModel = GeneratorViewModel()
+    @State private var shouldPulse = false
     
     init() {
         // Customize tab bar appearance
@@ -39,9 +40,18 @@ struct ContentView: View {
             }
             .tint(Color.dynamicText)
             .tabItem {
-                Label("Historie", systemImage: isDrawerPresented ? "person.badge.clock.fill" : "person.badge.clock")
+                HStack {
+                    Image(systemName: isDrawerPresented ? "person.badge.clock.fill" : "person.badge.clock")
+                        .symbolEffect(.pulse, options: .repeat(3), value: shouldPulse)
+                    Text("Historie")
+                }
             }
             .tag(1)
+            .onChange(of: isDrawerPresented) { _, isPresented in
+                if !isPresented {
+                    shouldPulse.toggle()
+                }
+            }
             
             CollectionsView()
                 .tint(Color.dynamicText)
@@ -57,3 +67,4 @@ struct ContentView: View {
     ContentView()
         .environmentObject(NameStore())
 }
+
