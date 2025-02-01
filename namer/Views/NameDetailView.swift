@@ -23,28 +23,36 @@ struct NameDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Button {
-                    showingImagePicker = true
-                } label: {
+                GeometryReader { geo in
                     if let image = selectedImage {
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFill()
-                            .frame(maxWidth: .infinity)
+                            .frame(width: geo.size.width)
                             .frame(height: 300)
                             .clipped()
                     } else {
                         Rectangle()
                             .fill(.clear)
-                            .frame(maxWidth: .infinity)
+                            .frame(width: geo.size.width)
                             .frame(height: 300)
                     }
                 }
+                .frame(height: 300)
                 .contextMenu {
                     Button {
                         showingImagePicker = true
                     } label: {
                         Label("Foto hinzufügen", systemImage: "photo")
+                    }
+                    
+                    if selectedImage != nil {
+                        Button(role: .destructive) {
+                            selectedImage = nil
+                            nameStore.deleteImage(for: name)
+                        } label: {
+                            Label("Foto löschen", systemImage: "trash")
+                        }
                     }
                     
                     Button(role: .destructive) {
@@ -128,6 +136,15 @@ struct NameDetailView: View {
                         Label("Foto hinzufügen", systemImage: "photo")
                     }
                     
+                    if selectedImage != nil {
+                        Button(role: .destructive) {
+                            selectedImage = nil
+                            nameStore.deleteImage(for: name)
+                        } label: {
+                            Label("Foto löschen", systemImage: "trash")
+                        }
+                    }
+                    
                     Button(role: .destructive) {
                         nameStore.toggleFavorite(name)
                         dismiss()
@@ -142,7 +159,9 @@ struct NameDetailView: View {
         }
         .tint(Color.dynamicText)
         .sheet(isPresented: $showingImagePicker) {
-            ImagePicker(image: $selectedImage)
+            ImagePicker(image: $selectedImage) { image in
+                nameStore.saveImage(image, for: name)
+            }
         }
         .onAppear {
             details = nameStore.getDetails(for: name)
@@ -194,6 +213,12 @@ struct DetailRow: View {
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
     @Environment(\.dismiss) private var dismiss
+    let onImageSelected: ((UIImage) -> Void)?
+    
+    init(image: Binding<UIImage?>, onImageSelected: ((UIImage) -> Void)? = nil) {
+        _image = image
+        self.onImageSelected = onImageSelected
+    }
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
@@ -224,7 +249,10 @@ struct ImagePicker: UIViewControllerRepresentable {
             if provider.canLoadObject(ofClass: UIImage.self) {
                 provider.loadObject(ofClass: UIImage.self) { image, _ in
                     DispatchQueue.main.async {
-                        self.parent.image = image as? UIImage
+                        if let image = image as? UIImage {
+                            self.parent.image = image
+                            self.parent.onImageSelected?(image)
+                        }
                     }
                 }
             }

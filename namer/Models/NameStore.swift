@@ -3,21 +3,33 @@ import SwiftUI
 
 @MainActor
 class NameStore: ObservableObject {
-    @Published var favoriteNames: [GermanName] = []
+    @Published private(set) var favoriteNames: [GermanName] = []
     @Published private var personDetails: [String: PersonDetails] = [:]
     private let favoritesKey = "favoriteNames"
     private var recentlyRemovedNames: [GermanName] = []
     private var recentlyDeletedNames: [GermanName] = []
     private let maxUndoCount = 10
-    private let detailsKey = "personDetails"
+    private let detailsKey = "nameDetails_"
+    private let imageDirectory = "StoredImages"
     
     // Add new properties for image handling
     private let imagePrefix = "nameImage_"
     private let imageRefsKey = "nameImageRefs"
+    private let imageKey = "image_"
     
     init() {
         loadFavorites()
         loadDetails()
+        createImageDirectoryIfNeeded()
+    }
+    
+    private func createImageDirectoryIfNeeded() {
+        guard let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let imagesURL = url.appendingPathComponent(imageDirectory)
+        
+        if !FileManager.default.fileExists(atPath: imagesURL.path) {
+            try? FileManager.default.createDirectory(at: imagesURL, withIntermediateDirectories: true)
+        }
     }
     
     private func loadFavorites() {
@@ -45,6 +57,9 @@ class NameStore: ObservableObject {
         if let index = favoriteNames.firstIndex(where: { $0.id == name.id }) {
             recentlyRemovedNames.append(favoriteNames[index])
             favoriteNames.remove(at: index)
+            // Delete associated data when removing from favorites
+            deleteDetails(for: name)
+            deleteImage(for: name)
         } else {
             favoriteNames.append(name)
         }
@@ -52,12 +67,9 @@ class NameStore: ObservableObject {
     }
     
     func undoRecentRemovals() {
-        if !recentlyRemovedNames.isEmpty {
-            withAnimation {
-                favoriteNames.append(contentsOf: recentlyRemovedNames)
-                recentlyRemovedNames.removeAll()
-            }
-        }
+        guard !recentlyRemovedNames.isEmpty else { return }
+        favoriteNames.append(contentsOf: recentlyRemovedNames)
+        recentlyRemovedNames.removeAll()
         saveFavorites()
     }
     
@@ -118,46 +130,49 @@ class NameStore: ObservableObject {
     // Save image for a name
     func saveImage(_ image: UIImage, for name: GermanName) {
         guard let data = image.jpegData(compressionQuality: 0.7) else { return }
-        let filename = imagePrefix + name.id
         
-        if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = url.appendingPathComponent(filename)
-            try? data.write(to: fileURL)
-            
-            // Save reference in UserDefaults
-            var imageRefs = UserDefaults.standard.dictionary(forKey: imageRefsKey) as? [String: String] ?? [:]
-            imageRefs[name.id] = filename
-            UserDefaults.standard.set(imageRefs, forKey: imageRefsKey)
+        guard let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            print("Failed to get document directory")
+            return
+        }
+        
+        let imagesURL = url.appendingPathComponent(imageDirectory)
+        let fileURL = imagesURL.appendingPathComponent("\(name.id).jpg")
+        
+        do {
+            try data.write(to: fileURL)
+            print("Image saved successfully for \(name.firstName)")
+        } catch {
+            print("Failed to save image: \(error.localizedDescription)")
         }
     }
     
     // Load image for a name
     func loadImage(for name: GermanName) -> UIImage? {
-        let imageRefs = UserDefaults.standard.dictionary(forKey: imageRefsKey) as? [String: String] ?? [:]
-        guard let filename = imageRefs[name.id] else { return nil }
-        
-        if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = url.appendingPathComponent(filename)
-            if let data = try? Data(contentsOf: fileURL) {
-                return UIImage(data: data)
-            }
+        guard let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return nil
         }
+        
+        let imagesURL = url.appendingPathComponent(imageDirectory)
+        let fileURL = imagesURL.appendingPathComponent("\(name.id).jpg")
+        
+        if let data = try? Data(contentsOf: fileURL) {
+            return UIImage(data: data)
+        }
+        
         return nil
     }
     
     // Delete image for a name
     func deleteImage(for name: GermanName) {
-        let filename = imagePrefix + name.id
-        
-        if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = url.appendingPathComponent(filename)
-            try? FileManager.default.removeItem(at: fileURL)
-            
-            // Remove reference from UserDefaults
-            var imageRefs = UserDefaults.standard.dictionary(forKey: imageRefsKey) as? [String: String] ?? [:]
-            imageRefs.removeValue(forKey: name.id)
-            UserDefaults.standard.set(imageRefs, forKey: imageRefsKey)
+        guard let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            return
         }
+        
+        let imagesURL = url.appendingPathComponent(imageDirectory)
+        let fileURL = imagesURL.appendingPathComponent("\(name.id).jpg")
+        
+        try? FileManager.default.removeItem(at: fileURL)
     }
     
     func hasAdditionalData(_ name: GermanName) -> Bool {
@@ -178,5 +193,12 @@ class NameStore: ObservableObject {
         }
         print("No details found for key: \(key)")
         return false
+    }
+    
+    private func deleteDetails(for name: GermanName) {
+        let key = makeKey(for: name)
+        print("Deleting details for key: \(key)")
+        personDetails.removeValue(forKey: key)
+        saveDetails()
     }
 }
