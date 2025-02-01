@@ -19,16 +19,32 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            NameGeneratorView(
-                isDrawerPresented: $isDrawerPresented,
-                hasGeneratedNames: $hasGeneratedNames,
-                viewModel: viewModel
-            )
+            NavigationStack {
+                NameGeneratorView(
+                    isDrawerPresented: $isDrawerPresented,
+                    hasGeneratedNames: $hasGeneratedNames,
+                    viewModel: viewModel
+                )
+            }
             .tint(Color.dynamicText)
             .tabItem {
                 Label("Neuer Name", systemImage: "person")
             }
             .tag(0)
+            .gesture(
+                DragGesture()
+                    .onEnded { gesture in
+                        if gesture.translation.width < -50 {
+                            withAnimation {
+                                selectedTab = min(selectedTab + 1, 2)
+                            }
+                        } else if gesture.translation.width > 50 {
+                            withAnimation {
+                                selectedTab = max(selectedTab - 1, 0)
+                            }
+                        }
+                    }
+            )
             
             NavigationStack {
                 GeneratedNamesListView(
@@ -36,20 +52,61 @@ struct ContentView: View {
                     sheetDetent: .constant(.large)
                 )
                 .environmentObject(nameStore)
+                .overlay {
+                    if viewModel.nameHistory.isEmpty {
+                        ContentUnavailableView {
+                            Label("Keine Namen generiert", systemImage: "person.badge.clock")
+                                .foregroundStyle(Color.dynamicText)
+                                .font(.body.weight(.regular))
+                        }
+                    }
+                }
             }
             .tint(Color.dynamicText)
             .tabItem {
                 Label("Historie", systemImage: "person.badge.clock")
             }
             .tag(1)
+            .gesture(
+                DragGesture()
+                    .onEnded { gesture in
+                        if gesture.translation.width < -50 {
+                            withAnimation {
+                                selectedTab = min(selectedTab + 1, 2)
+                            }
+                        } else if gesture.translation.width > 50 {
+                            withAnimation {
+                                selectedTab = max(selectedTab - 1, 0)
+                            }
+                        }
+                    }
+            )
             
-            CollectionsView()
-                .tint(Color.dynamicText)
-                .tabItem {
-                    Label("Favoriten", systemImage: "star.fill")
-                }
-                .tag(2)
+            NavigationStack {
+                CollectionsView()
+            }
+            .tint(Color.dynamicText)
+            .tabItem {
+                Label("Favoriten", systemImage: "star.fill")
+            }
+            .tag(2)
+            .gesture(
+                DragGesture()
+                    .onEnded { gesture in
+                        if gesture.translation.width < -50 {
+                            withAnimation {
+                                selectedTab = min(selectedTab + 1, 2)
+                            }
+                        } else if gesture.translation.width > 50 {
+                            withAnimation {
+                                selectedTab = max(selectedTab - 1, 0)
+                            }
+                        }
+                    }
+            )
         }
+        .tabViewStyle(.automatic)
+        .animation(.easeInOut(duration: 0.3), value: selectedTab)
     }
 }
 
