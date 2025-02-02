@@ -121,6 +121,7 @@ struct NameGeneratorView: View {
                                     .foregroundStyle(Color.dynamicText)
                             }
                             .pickerStyle(.wheel)
+                            .frame(height: 150)
                             
                             Text(decadeText(for: birthYear))
                                 .font(.subheadline)
@@ -134,7 +135,7 @@ struct NameGeneratorView: View {
                     
                     // Generate Button
                     Button(action: generateAndShowNames) {
-                        Text("Namen Generieren!")
+                        Text("Namen Generieren")
                             .font(.title3)
                             .bold()
                             .frame(maxWidth: .infinity)
@@ -203,4 +204,5 @@ struct NameGeneratorView: View {
 
 #Preview {
     NameGeneratorView(isDrawerPresented: .constant(false), hasGeneratedNames: .constant(false), viewModel: GeneratorViewModel())
+        .environmentObject(NameStore())
 }

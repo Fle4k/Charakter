@@ -61,6 +61,13 @@ struct ContentView: View {
                         }
                     }
                 }
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("Historie")
+                            .font(.headline)
+                            .foregroundStyle(Color.dynamicText)
+                    }
+                }
             }
             .tint(Color.dynamicText)
             .tabItem {
@@ -106,7 +113,7 @@ struct ContentView: View {
             )
         }
         .tabViewStyle(.automatic)
-        .animation(.easeInOut(duration: 0.3), value: selectedTab)
+        .animation(.easeInOut(duration: 0.5), value: selectedTab)
     }
 }
 

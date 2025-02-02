@@ -1,6 +1,66 @@
 import SwiftUI
 import PhotosUI
 
+extension UIImage {
+    var averageBrightness: CGFloat {
+        guard let inputImage = CIImage(image: self) else { return 0 }
+        let extentVector = CIVector(x: inputImage.extent.origin.x,
+                                  y: inputImage.extent.origin.y,
+                                  z: inputImage.extent.size.width,
+                                  w: inputImage.extent.size.height)
+
+        guard let filter = CIFilter(name: "CIAreaAverage",
+                                  parameters: [kCIInputImageKey: inputImage,
+                                             kCIInputExtentKey: extentVector]) else { return 0 }
+        guard let outputImage = filter.outputImage else { return 0 }
+
+        var bitmap = [UInt8](repeating: 0, count: 4)
+        let context = CIContext(options: [.workingColorSpace: kCFNull as Any])
+        context.render(outputImage,
+                      toBitmap: &bitmap,
+                      rowBytes: 4,
+                      bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
+                      format: .RGBA8,
+                      colorSpace: nil)
+
+        let brightness = (CGFloat(bitmap[0]) + CGFloat(bitmap[1]) + CGFloat(bitmap[2])) / (3.0 * 255.0)
+        return brightness
+    }
+}
+
+struct CustomNavigationBarModifier: ViewModifier {
+    let backgroundColor: UIColor
+    let textColor: UIColor
+    
+    init(backgroundColor: UIColor, textColor: UIColor) {
+        self.backgroundColor = backgroundColor
+        self.textColor = textColor
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .onAppear {
+                let appearance = UINavigationBarAppearance()
+                appearance.configureWithTransparentBackground()
+                appearance.backgroundColor = backgroundColor
+                
+                let buttonAppearance = UIBarButtonItemAppearance()
+                buttonAppearance.normal.titleTextAttributes = [.foregroundColor: textColor]
+                appearance.buttonAppearance = buttonAppearance
+                
+                UINavigationBar.appearance().standardAppearance = appearance
+                UINavigationBar.appearance().scrollEdgeAppearance = appearance
+            }
+    }
+}
+
+struct NavigationBarColorPreferenceKey: PreferenceKey {
+    static var defaultValue: Color = .dynamicText
+    static func reduce(value: inout Color, nextValue: () -> Color) {
+        value = nextValue()
+    }
+}
+
 struct NameDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let name: GermanName
@@ -8,6 +68,8 @@ struct NameDetailView: View {
     @State private var showingImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var details = PersonDetails()
+    @State private var menuIconColor: Color = .dynamicText
+    @Environment(\.colorScheme) var colorScheme
     
     private var hasStoredData: Bool {
         !details.height.isEmpty ||
@@ -31,6 +93,9 @@ struct NameDetailView: View {
                             .frame(width: geo.size.width)
                             .frame(height: 300)
                             .clipped()
+                            .onChange(of: image) { _, newImage in
+                                updateMenuIconColor(for: newImage)
+                            }
                     } else {
                         Rectangle()
                             .fill(.clear)
@@ -56,6 +121,8 @@ struct NameDetailView: View {
                     }
                     
                     Button(role: .destructive) {
+                        let generator = UINotificationFeedbackGenerator()
+                        generator.notificationOccurred(.success)
                         nameStore.toggleFavorite(name)
                         dismiss()
                     } label: {
@@ -127,6 +194,7 @@ struct NameDetailView: View {
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("")
+        .toolbarBackground(.clear, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
@@ -146,6 +214,8 @@ struct NameDetailView: View {
                     }
                     
                     Button(role: .destructive) {
+                        let generator = UINotificationFeedbackGenerator()
+                        generator.notificationOccurred(.success)
                         nameStore.toggleFavorite(name)
                         dismiss()
                     } label: {
@@ -153,11 +223,9 @@ struct NameDetailView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .foregroundStyle(Color.dynamicText)
                 }
             }
         }
-        .tint(Color.dynamicText)
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(image: $selectedImage) { image in
                 nameStore.saveImage(image, for: name)
@@ -166,7 +234,17 @@ struct NameDetailView: View {
         .onAppear {
             details = nameStore.getDetails(for: name)
             selectedImage = nameStore.loadImage(for: name)
+            if let image = selectedImage {
+                updateMenuIconColor(for: image)
+            } else {
+                menuIconColor = .dynamicText
+            }
         }
+    }
+    
+    private func updateMenuIconColor(for image: UIImage) {
+        let brightness = image.averageBrightness
+        menuIconColor = brightness > 0.5 ? .black : .white
     }
 }
 

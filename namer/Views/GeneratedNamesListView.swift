@@ -13,13 +13,7 @@ struct GeneratedNamesListView: View {
                 HStack(spacing: 0) {
                     // Leading star button
                     Button {
-                        if nameStore.favoriteNames.contains(where: { $0.id == name.id }) {
-                            handleUnfavorite(name)
-                        } else {
-                            withAnimation {
-                                nameStore.toggleFavorite(name)
-                            }
-                        }
+                        handleFavoriteAction(for: name)
                     } label: {
                         Image(systemName: nameStore.favoriteNames.contains(where: { $0.id == name.id }) ? "star.fill" : "star")
                             .foregroundStyle(Color.dynamicText)
@@ -71,6 +65,20 @@ struct GeneratedNamesListView: View {
             }
         } message: { name in
             Text("Möchtest du '\(name.firstName) \(name.lastName)' wirklich aus deinen Favoriten entfernen? Alle gespeicherten Informationen gehen dabei verloren.")
+        }
+    }
+    
+    private func handleFavoriteAction(for name: GermanName) {
+        let generator = UISelectionFeedbackGenerator()
+        generator.prepare()
+        
+        if nameStore.favoriteNames.contains(where: { $0.id == name.id }) {
+            handleUnfavorite(name)
+        } else {
+            withAnimation {
+                generator.selectionChanged()  // Changed to selection feedback
+                nameStore.toggleFavorite(name)
+            }
         }
     }
     

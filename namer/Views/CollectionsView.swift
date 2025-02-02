@@ -171,6 +171,20 @@ struct CollectionsView: View {
                     .foregroundStyle(Color.dynamicText)
             }
         }
+        .alert(
+            "Namen entfernen?",
+            isPresented: $showingUnfavoriteAlert,
+            presenting: nameToUnfavorite
+        ) { name in
+            Button("Abbrechen", role: .cancel) {}
+            Button("Entfernen", role: .destructive) {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+                withAnimation {
+                    nameStore.toggleFavorite(name)
+                }
+            }
+        }
         .tint(Color.dynamicText)
         .onShake {
             nameStore.undoRecentRemovals()
@@ -182,6 +196,8 @@ struct CollectionsView: View {
             nameToUnfavorite = name
             showingUnfavoriteAlert = true
         } else {
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
             withAnimation {
                 nameStore.toggleFavorite(name)
             }
